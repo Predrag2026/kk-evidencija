@@ -5,8 +5,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0"/>
 <meta name="mobile-web-app-capable" content="yes"/>
 <meta name="apple-mobile-web-app-capable" content="yes"/>
-<meta name="apple-mobile-web-app-title" content="KK Evidencija"/>
-<title>KK Evidencija</title>
+<meta name="apple-mobile-web-app-title" content="BB Basket"/>
+<title>KK BB Basket Mladenovac</title>
 <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700;800&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet"/>
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
@@ -103,8 +103,8 @@ select option{background:#1a1f2e;color:#e2e8f0}
     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M4.93 4.93c4.08 4.08 4.08 10.66 0 14.74"/><path d="M19.07 4.93c-4.08 4.08-4.08 10.66 0 14.74"/><line x1="2" y1="12" x2="22" y2="12"/></svg>
   </div>
   <div>
-    <div class="app-title">KK Evidencija</div>
-    <div class="app-sub">Košarkaški klub — Mlađe kategorije</div>
+    <div class="app-title">KK BB Basket Mladenovac</div>
+    <div class="app-sub">Mlađe kategorije</div>
   </div>
   <div id="sync-dot" class="sync-dot loading"></div>
 </div>
@@ -113,6 +113,7 @@ select option{background:#1a1f2e;color:#e2e8f0}
 <div id="page-clanovi" class="page"></div>
 <div id="page-uplate" class="page"></div>
 <div id="page-projekcije" class="page"></div>
+<div id="page-izvestaj" class="page"></div>
 
 <nav class="bottom-nav">
   <button class="nav-btn active" onclick="goTo('dashboard')">
@@ -130,6 +131,10 @@ select option{background:#1a1f2e;color:#e2e8f0}
   <button class="nav-btn" onclick="goTo('projekcije')">
     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/><line x1="2" y1="20" x2="22" y2="20"/></svg>
     Projekcije
+  </button>
+  <button class="nav-btn" onclick="goTo('izvestaj')">
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+    Izveštaj
   </button>
 </nav>
 
@@ -334,7 +339,7 @@ function goTo(page){
   document.querySelectorAll(".page").forEach(p=>p.classList.remove("active"));
   document.querySelectorAll(".nav-btn").forEach(b=>b.classList.remove("active"));
   document.getElementById("page-"+page).classList.add("active");
-  document.querySelectorAll(".nav-btn")[["dashboard","clanovi","uplate","projekcije"].indexOf(page)].classList.add("active");
+  document.querySelectorAll(".nav-btn")[["dashboard","clanovi","uplate","projekcije","izvestaj"].indexOf(page)].classList.add("active");
   currentPage=page; render();
 }
 function openModal(id){ document.getElementById(id).classList.add("open"); }
@@ -415,31 +420,6 @@ function renderDashboard(){
     ${statCard("alert","Neplaćen ovaj mes.",neplaceneDanas.length,"porodica","#f59e0b")}
     ${statCard("trend","Proj. mesečno",Math.round(projM/1000)+"k RSD","","#0d9488")}
   </div>`;
-
-  if(saDugom.length){
-    html+=`<div class="dospelo-box">
-      <div style="display:flex;align-items:center;gap:7px;margin-bottom:11px">
-        ${svg("alert","#dc2626",14)}
-        <span style="color:#dc2626;font-weight:700;font-size:11px;text-transform:uppercase;letter-spacing:0.06em">Porodice sa dugom</span>
-      </div>`;
-    saDugom.forEach(pid=>{
-      const nep=getNeplaceniMeseci(pid);
-      const deca=getDecaP(pid);
-      const uk=getUkupnoP(pid);
-      html+=`<div class="row-sep">
-        <div>
-          <div style="color:#e2e8f0;font-size:14px;font-weight:600">${getNazivP(pid)}</div>
-          <div style="color:#64748b;font-size:12px">${deca.length} ${deca.length===1?"dete":"dece"} · ${fmt(uk)}/mes</div>
-          <div style="margin-top:3px">${nep.slice(-3).map(mes=>{
-            const [y,mo]=mes.split("-");
-            return `<span class="dug-chip">${MESECI_KR[parseInt(mo)-1]} ${y}</span>`;
-          }).join("")}${nep.length>3?`<span style="color:#64748b;font-size:11px"> +${nep.length-3}</span>`:""}</div>
-        </div>
-        <span class="badge badge-red">${nep.length} mes.</span>
-      </div>`;
-    });
-    html+=`</div>`;
-  }
 
   html+=`<div class="section"><div class="section-title">Prihodi po kategoriji</div>`;
   KATEGORIJE.forEach(k=>{
@@ -804,11 +784,141 @@ async function obrisiUplatu(id){
 // ═══════════════════════════════════════════
 // MAIN
 // ═══════════════════════════════════════════
+// ═══════════════════════════════════════════
+// IZVEŠTAJ
+// ═══════════════════════════════════════════
+let izvKat="Sve", izvStatus="Svi", izvMesec="";
+
+function initIzvMesec(){
+  // Podesi default mesec na tekuci
+  if(!izvMesec){
+    const d=new Date();
+    izvMesec=ym(d.getFullYear(),d.getMonth());
+  }
+}
+
+function renderIzvestaj(){
+  initIzvMesec();
+
+  // Generiši listu meseci (od najranijeg treninga do danas)
+  const sviDatumi = clanovi.map(c=>c.datum_treninga).filter(Boolean).sort();
+  const najraniji = sviDatumi[0];
+  const svMeseci = najraniji ? getMesecOd(najraniji) : [];
+
+  // Filtriraj decu
+  const filtered = clanovi.filter(c => {
+    if(izvKat!=="Sve" && c.kategorija!==izvKat) return false;
+    if(izvStatus!=="Svi"){
+      const nep = getNeplaceniMeseciDeteta(c);
+      const placeni = getPlaceniMeseci(c.porodica_id);
+      const aktivan = c.datum_treninga && getMesecOd(c.datum_treninga).includes(izvMesec);
+      if(!aktivan) return false; // dete nije bilo u klubu taj mesec
+      const placenTajMesec = placeni.includes(izvMesec);
+      if(izvStatus==="Plaćeno" && !placenTajMesec) return false;
+      if(izvStatus==="Neplaćeno" && placenTajMesec) return false;
+    } else {
+      // Kad je "Svi" — prikaži samo decu koja su bila u klubu taj mesec
+      if(!c.datum_treninga) return false;
+      if(!getMesecOd(c.datum_treninga).includes(izvMesec)) return false;
+    }
+    return true;
+  });
+
+  const ukupnoIznos = filtered.reduce((s,c)=>s+c.iznos,0);
+  const placeni_count = filtered.filter(c=>{
+    const placeni=getPlaceniMeseci(c.porodica_id);
+    return placeni.includes(izvMesec);
+  }).length;
+
+  let html=`
+  <div style="margin-bottom:18px">
+    <h2 class="page-title">Izveštaj</h2>
+  </div>
+
+  <div class="section" style="margin-bottom:14px">
+    <div class="section-title">Filteri</div>
+
+    <div class="field-wrap">
+      <label class="field-label">Mesec</label>
+      <select class="input-field" onchange="izvMesec=this.value;renderIzvestaj()">
+        ${svMeseci.slice().reverse().map(m=>`<option value="${m}" ${m===izvMesec?"selected":""}>${formatMesec(m)}</option>`).join("")}
+      </select>
+    </div>
+
+    <div class="field-wrap">
+      <label class="field-label">Kategorija</label>
+      <select class="input-field" onchange="izvKat=this.value;renderIzvestaj()">
+        ${["Sve",...KATEGORIJE].map(k=>`<option value="${k}" ${k===izvKat?"selected":""}>${k}</option>`).join("")}
+      </select>
+    </div>
+
+    <div class="field-wrap" style="margin-bottom:0">
+      <label class="field-label">Status naplate</label>
+      <select class="input-field" onchange="izvStatus=this.value;renderIzvestaj()">
+        ${["Svi","Plaćeno","Neplaćeno"].map(s=>`<option value="${s}" ${s===izvStatus?"selected":""}>${s}</option>`).join("")}
+      </select>
+    </div>
+  </div>
+
+  <div class="grid2" style="margin-bottom:14px">
+    ${statCard("users","Pronađeno",filtered.length,"dece","#3b82f6")}
+    ${statCard("payment","Platilo",placeni_count+" / "+filtered.length,"za izabrani mesec","#0d9488")}
+  </div>`;
+
+  if(!filtered.length){
+    html+=`<div class="empty">Nema dece za izabrane filtere</div>`;
+  } else {
+    filtered.forEach(c=>{
+      const placeni=getPlaceniMeseci(c.porodica_id);
+      const placenTajMesec=placeni.includes(izvMesec);
+      const iznos=c.iznos===0?`<span style="color:#0d9488;font-weight:700">Besplatno</span>`:fmt(c.iznos);
+      const statusChip=placenTajMesec
+        ?`<span class="ok-chip">✓ Plaćeno</span>`
+        :`<span class="dug-chip">✗ Neplaćeno</span>`;
+      const rB=c.r_br===1?"badge-blue":c.r_br===2?"badge-amber":"badge-green";
+      const rT=c.r_br===1?"1. dete":c.r_br===2?"2. dete":"3.+ dete";
+      html+=`<div class="member-card">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start">
+          <div style="flex:1;min-width:0">
+            <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-bottom:3px">
+              <span style="color:#f1f5f9;font-weight:700;font-size:15px">${c.ime}</span>
+              <span class="badge ${rB}">${rT}</span>
+            </div>
+            <div style="color:#64748b;font-size:12px">${c.kategorija} · ${iznos}</div>
+            <div style="color:#475569;font-size:11px;margin-top:2px">👨‍👩‍👦 ${getNazivP(c.porodica_id)}${c.tel?" · "+c.tel:""}</div>
+            <div style="margin-top:5px">${statusChip}</div>
+          </div>
+          <button class="icon-btn icon-btn-green" title="Uplata" onclick="openUplata('${c.porodica_id}')" style="margin-left:8px">
+            ${svg("payment","#0d9488",14)}
+          </button>
+        </div>
+      </div>`;
+    });
+
+    if(izvStatus==="Neplaćeno"){
+      const ukNeplac = filtered.reduce((s,c)=>s+c.iznos,0);
+      html+=`<div style="background:#dc262610;border:1px solid #dc262633;border-radius:12px;padding:14px;margin-top:8px;display:flex;justify-content:space-between;align-items:center">
+        <span style="color:#94a3b8;font-size:13px">Ukupno neplaćeno</span>
+        <span style="color:#dc2626;font-weight:700;font-size:15px">${fmt(ukNeplac)}</span>
+      </div>`;
+    }
+    if(izvStatus==="Plaćeno"){
+      html+=`<div style="background:#0d948810;border:1px solid #0d948833;border-radius:12px;padding:14px;margin-top:8px;display:flex;justify-content:space-between;align-items:center">
+        <span style="color:#94a3b8;font-size:13px">Ukupno naplaćeno</span>
+        <span style="color:#0d9488;font-weight:700;font-size:15px">${fmt(ukupnoIznos)}</span>
+      </div>`;
+    }
+  }
+
+  document.getElementById("page-izvestaj").innerHTML=html;
+}
+
 function render(){
   if(currentPage==="dashboard")   renderDashboard();
   if(currentPage==="clanovi")     renderClanovi();
   if(currentPage==="uplate")      renderUplate();
   if(currentPage==="projekcije")  renderProjekcije();
+  if(currentPage==="izvestaj")    renderIzvestaj();
 }
 
 document.getElementById("page-dashboard").innerHTML=loading();
