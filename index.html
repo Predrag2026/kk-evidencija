@@ -1,2 +1,802 @@
+<!DOCTYPE html>
+<html lang="sr">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0"/>
+<meta name="mobile-web-app-capable" content="yes"/>
+<meta name="apple-mobile-web-app-capable" content="yes"/>
+<meta name="apple-mobile-web-app-title" content="KK Evidencija"/>
+<title>KK Evidencija</title>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700;800&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet"/>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#0f1320;font-family:'DM Sans',sans-serif;color:#e2e8f0;max-width:480px;margin:0 auto;min-height:100vh}
+input,select,button,textarea{font-family:'DM Sans',sans-serif}
+::-webkit-scrollbar{width:4px}
+::-webkit-scrollbar-thumb{background:#2d3650;border-radius:2px}
+input[type=date]::-webkit-calendar-picker-indicator{filter:invert(0.5)}
+select option{background:#1a1f2e;color:#e2e8f0}
+.page{display:none;padding:16px 16px 86px}
+.page.active{display:block}
+.header{padding:16px;display:flex;align-items:center;gap:10px;border-bottom:1px solid #2d3650;position:sticky;top:0;background:#0f1320;z-index:10}
+.logo-box{background:#e85d26;border-radius:11px;padding:8px;display:flex;flex-shrink:0}
+.app-title{color:#f1f5f9;font-family:'Outfit',sans-serif;font-weight:800;font-size:16px;letter-spacing:-0.02em}
+.app-sub{color:#64748b;font-size:11px}
+.sync-dot{width:8px;height:8px;border-radius:50%;background:#0d9488;margin-left:auto;flex-shrink:0}
+.sync-dot.err{background:#dc2626}
+.sync-dot.loading{background:#f59e0b;animation:pulse 1s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:0.3}}
+.bottom-nav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:480px;background:#151929;border-top:1px solid #2d3650;display:flex;padding:7px 0 13px;z-index:100}
+.nav-btn{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;background:none;border:none;cursor:pointer;padding:5px 0;color:#475569;font-size:10px;font-weight:600}
+.nav-btn.active{color:#e85d26}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px}
+.card{background:#1a1f2e;border:1px solid #2d3650;border-radius:14px;padding:16px;position:relative;overflow:hidden}
+.card-accent{position:absolute;top:0;right:0;width:65px;height:65px;opacity:0.07;border-radius:0 14px 0 65px}
+.card-icon{border-radius:8px;padding:6px;display:inline-flex;margin-bottom:10px}
+.card-label{color:#64748b;font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:0.05em;display:block;margin-bottom:6px}
+.card-val{color:#f1f5f9;font-size:22px;font-family:'Outfit',sans-serif;font-weight:700;line-height:1}
+.card-sub{color:#64748b;font-size:11px;margin-top:4px}
+.section{background:#1a1f2e;border:1px solid #2d3650;border-radius:14px;padding:16px;margin-bottom:14px}
+.section-title{color:#94a3b8;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;margin-bottom:13px}
+.member-card{background:#1a1f2e;border:1px solid #2d3650;border-radius:13px;padding:13px;margin-bottom:8px}
+.badge{padding:2px 7px;border-radius:10px;font-size:11px;font-weight:700;display:inline-block}
+.badge-green{background:#0d948822;color:#0d9488}
+.badge-yellow{background:#d9770622;color:#d97706}
+.badge-red{background:#dc262622;color:#dc2626}
+.badge-blue{background:#3b82f622;color:#3b82f6}
+.badge-amber{background:#f59e0b22;color:#f59e0b}
+.btn-row{display:flex;gap:4px;margin-left:8px;flex-shrink:0}
+.icon-btn{border:none;border-radius:7px;padding:7px;cursor:pointer;display:inline-flex;align-items:center;justify-content:center}
+.icon-btn-green{background:#0d948822}
+.icon-btn-blue{background:#3b82f622}
+.icon-btn-red{background:#dc262622}
+.main-btn{width:100%;border:none;border-radius:10px;padding:12px;color:#fff;font-weight:700;font-size:15px;cursor:pointer;font-family:'Outfit',sans-serif;margin-top:4px}
+.btn-orange{background:#e85d26}
+.btn-teal{background:#0d9488}
+.input-field{width:100%;background:#0f1320;border:1px solid #2d3650;border-radius:10px;padding:11px 14px;color:#e2e8f0;font-size:14px;outline:none;box-sizing:border-box}
+.input-field:focus{border-color:#e85d26}
+.field-label{display:block;color:#94a3b8;font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.06em;margin-bottom:5px}
+.field-wrap{margin-bottom:13px}
+.overlay{display:none;position:fixed;inset:0;z-index:1000;align-items:center;justify-content:center;padding:16px;background:rgba(0,0,0,0.75);backdrop-filter:blur(4px)}
+.overlay.open{display:flex}
+.modal{background:#1a1f2e;border:1px solid #2d3650;border-radius:16px;padding:22px;width:100%;max-width:460px;max-height:92vh;overflow-y:auto;position:relative}
+.modal-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:18px}
+.modal-title{color:#f1f5f9;font-size:17px;font-family:'Outfit',sans-serif;font-weight:700}
+.close-btn{background:none;border:none;cursor:pointer;color:#64748b;padding:2px}
+.search-wrap{position:relative;margin-bottom:9px}
+.search-icon{position:absolute;left:11px;top:50%;transform:translateY(-50%)}
+.search-input{padding-left:36px!important}
+.filter-row{display:flex;gap:6px;margin-bottom:13px;flex-wrap:wrap}
+.filter-btn{padding:5px 12px;border-radius:20px;border:none;cursor:pointer;font-size:12px;font-weight:600;background:#1a1f2e;color:#64748b}
+.filter-btn.active{background:#e85d26;color:#fff}
+.page-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px}
+.page-title{color:#f1f5f9;font-size:22px;font-family:'Outfit',sans-serif;font-weight:700;margin:0}
+.add-btn{display:flex;align-items:center;gap:5px;background:#e85d26;border:none;border-radius:10px;padding:9px 14px;color:#fff;font-weight:700;font-size:13px;cursor:pointer}
+.bar-wrap{background:#0f1320;border-radius:4px;height:5px;margin-top:5px}
+.bar{background:linear-gradient(90deg,#e85d26,#f97316);height:100%;border-radius:4px}
+.row-sep{padding:10px 0;border-bottom:1px solid #2d3650;display:flex;justify-content:space-between;align-items:center}
+.row-sep:last-child{border-bottom:none}
+.nova-box{background:#0f1320;border:1px solid #2d3650;border-radius:11px;padding:13px;margin-bottom:13px}
+.price-prev{border-radius:11px;padding:12px 14px;margin-bottom:13px;display:flex;justify-content:space-between;align-items:center}
+.dospelo-box{background:#1a1f2e;border:1px solid #dc262644;border-radius:14px;padding:16px;margin-bottom:14px}
+.empty{text-align:center;color:#475569;padding:40px 0;font-size:14px}
+.loading-screen{display:flex;flex-direction:column;align-items:center;justify-content:center;height:60vh;gap:16px}
+.spinner{width:36px;height:36px;border:3px solid #2d3650;border-top-color:#e85d26;border-radius:50%;animation:spin 0.8s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.toast{position:fixed;bottom:90px;left:50%;transform:translateX(-50%);background:#1a1f2e;border:1px solid #2d3650;border-radius:10px;padding:10px 18px;font-size:13px;font-weight:600;z-index:2000;opacity:0;transition:opacity 0.3s;pointer-events:none;white-space:nowrap}
+.toast.show{opacity:1}
+.toast.ok{border-color:#0d948866;color:#0d9488}
+.toast.err{border-color:#dc262666;color:#dc2626}
+.mesec-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-bottom:13px}
+.mesec-btn{padding:8px 4px;border-radius:8px;border:1px solid #2d3650;background:#0f1320;color:#94a3b8;font-size:12px;font-weight:600;cursor:pointer;text-align:center}
+.mesec-btn.placen{background:#0d948822;border-color:#0d948866;color:#0d9488}
+.mesec-btn.selected{background:#e85d2622;border-color:#e85d26;color:#e85d26}
+.mesec-btn.disabled{opacity:0.3;cursor:not-allowed}
+.dug-chip{display:inline-block;background:#dc262618;border:1px solid #dc262644;color:#dc2626;border-radius:6px;padding:2px 7px;font-size:11px;font-weight:700;margin:2px}
+.ok-chip{display:inline-block;background:#0d948818;border:1px solid #0d948844;color:#0d9488;border-radius:6px;padding:2px 7px;font-size:11px;font-weight:700;margin:2px}
+</style>
+</head>
+<body>
 
-!DOCTYPE html><html lang="sr"><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0"/><title>KK Evidencija</title><link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700;800&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet"/><style>*{margin:0;padding:0;box-sizing:border-box}body{background:#0f1320;font-family:'DM Sans',sans-serif;color:#e2e8f0;max-width:480px;margin:0 auto;min-height:100vh}input,select,button,textarea{font-family:'DM Sans',sans-serif}.page{display:none;padding:16px 16px 86px}.page.active{display:block}.header{padding:16px;display:flex;align-items:center;gap:10px;border-bottom:1px solid #2d3650;position:sticky;top:0;background:#0f1320;z-index:10}.logo-box{background:#e85d26;border-radius:11px;padding:8px;display:flex;flex-shrink:0}.app-title{color:#f1f5f9;font-family:'Outfit',sans-serif;font-weight:800;font-size:16px}.app-sub{color:#64748b;font-size:11px}.sync-dot{width:8px;height:8px;border-radius:50%;background:#0d9488;margin-left:auto;flex-shrink:0}.sync-dot.err{background:#dc2626}.sync-dot.loading{background:#f59e0b;animation:pulse 1s infinite}@keyframes pulse{0%,100%{opacity:1}50%{opacity:0.3}}.bottom-nav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:480px;background:#151929;border-top:1px solid #2d3650;display:flex;padding:7px 0 13px;z-index:100}.nav-btn{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;background:none;border:none;cursor:pointer;padding:5px 0;color:#475569;font-size:10px;font-weight:600}.nav-btn.active{color:#e85d26}.grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px}.card{background:#1a1f2e;border:1px solid #2d3650;border-radius:14px;padding:16px;position:relative;overflow:hidden}.card-accent{position:absolute;top:0;right:0;width:65px;height:65px;opacity:0.07;border-radius:0 14px 0 65px}.card-icon{border-radius:8px;padding:6px;display:inline-flex;margin-bottom:10px}.card-label{color:#64748b;font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:0.05em;display:block;margin-bottom:6px}.card-val{color:#f1f5f9;font-size:22px;font-family:'Outfit',sans-serif;font-weight:700;line-height:1}.card-sub{color:#64748b;font-size:11px;margin-top:4px}.section{background:#1a1f2e;border:1px solid #2d3650;border-radius:14px;padding:16px;margin-bottom:14px}.section-title{color:#94a3b8;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;margin-bottom:13px}.member-card{background:#1a1f2e;border:1px solid #2d3650;border-radius:13px;padding:13px;margin-bottom:8px}.badge{padding:2px 7px;border-radius:10px;font-size:11px;font-weight:700;display:inline-block}.badge-green{background:#0d948822;color:#0d9488}.badge-yellow{background:#d9770622;color:#d97706}.badge-red{background:#dc262622;color:#dc2626}.badge-blue{background:#3b82f622;color:#3b82f6}.badge-amber{background:#f59e0b22;color:#f59e0b}.btn-row{display:flex;gap:4px;margin-left:8px;flex-shrink:0}.icon-btn{border:none;border-radius:7px;padding:7px;cursor:pointer;display:inline-flex;align-items:center;justify-content:center}.icon-btn-green{background:#0d948822}.icon-btn-blue{background:#3b82f622}.icon-btn-red{background:#dc262622}.main-btn{width:100%;border:none;border-radius:10px;padding:12px;color:#fff;font-weight:700;font-size:15px;cursor:pointer;font-family:'Outfit',sans-serif;margin-top:4px}.btn-orange{background:#e85d26}.btn-teal{background:#0d9488}.input-field{width:100%;background:#0f1320;border:1px solid #2d3650;border-radius:10px;padding:11px 14px;color:#e2e8f0;font-size:14px;outline:none;box-sizing:border-box}.input-field:focus{border-color:#e85d26}.field-label{display:block;color:#94a3b8;font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.06em;margin-bottom:5px}.field-wrap{margin-bottom:13px}.overlay{display:none;position:fixed;inset:0;z-index:1000;align-items:center;justify-content:center;padding:16px;background:rgba(0,0,0,0.75);backdrop-filter:blur(4px)}.overlay.open{display:flex}.modal{background:#1a1f2e;border:1px solid #2d3650;border-radius:16px;padding:22px;width:100%;max-width:460px;max-height:92vh;overflow-y:auto;position:relative}.modal-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:18px}.modal-title{color:#f1f5f9;font-size:17px;font-family:'Outfit',sans-serif;font-weight:700}.close-btn{background:none;border:none;cursor:pointer;color:#64748b;padding:2px}.search-wrap{position:relative;margin-bottom:9px}.search-icon{position:absolute;left:11px;top:50%;transform:translateY(-50%)}.search-input{padding-left:36px!important}.filter-row{display:flex;gap:6px;margin-bottom:13px;flex-wrap:wrap}.filter-btn{padding:5px 12px;border-radius:20px;border:none;cursor:pointer;font-size:12px;font-weight:600;background:#1a1f2e;color:#64748b}.filter-btn.active{background:#e85d26;color:#fff}.page-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px}.page-title{color:#f1f5f9;font-size:22px;font-family:'Outfit',sans-serif;font-weight:700;margin:0}.add-btn{display:flex;align-items:center;gap:5px;background:#e85d26;border:none;border-radius:10px;padding:9px 14px;color:#fff;font-weight:700;font-size:13px;cursor:pointer}.bar-wrap{background:#0f1320;border-radius:4px;height:5px;margin-top:5px}.bar{background:linear-gradient(90deg,#e85d26,#f97316);height:100%;border-radius:4px}.row-sep{padding:10px 0;border-bottom:1px solid #2d3650;display:flex;justify-content:space-between;align-items:center}.row-sep:last-child{border-bottom:none}.nova-box{background:#0f1320;border:1px solid #2d3650;border-radius:11px;padding:13px;margin-bottom:13px}.price-prev{border-radius:11px;padding:12px 14px;margin-bottom:13px;display:flex;justify-content:space-between;align-items:center}.dospelo-box{background:#1a1f2e;border:1px solid #dc262644;border-radius:14px;padding:16px;margin-bottom:14px}.empty{text-align:center;color:#475569;padding:40px 0;font-size:14px}.loading-screen{display:flex;flex-direction:column;align-items:center;justify-content:center;height:60vh;gap:16px}.spinner{width:36px;height:36px;border:3px solid #2d3650;border-top-color:#e85d26;border-radius:50%;animation:spin 0.8s linear infinite}@keyframes spin{to{transform:rotate(360deg)}}.toast{position:fixed;bottom:90px;left:50%;transform:translateX(-50%);background:#1a1f2e;border:1px solid #2d3650;border-radius:10px;padding:10px 18px;font-size:13px;font-weight:600;z-index:2000;opacity:0;transition:opacity 0.3s;pointer-events:none;white-space:nowrap}.toast.show{opacity:1}.toast.ok{border-color:#0d948866;color:#0d9488}.toast.err{border-color:#dc262666;color:#dc2626}</style></head><body><div class="header"><div class="logo-box"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M4.93 4.93c4.08 4.08 4.08 10.66 0 14.74"/><path d="M19.07 4.93c-4.08 4.08-4.08 10.66 0 14.74"/><line x1="2" y1="12" x2="22" y2="12"/></svg></div><div><div class="app-title">KK Evidencija</div><div class="app-sub">Košarkaški klub — Mlađe kategorije</div></div><div id="sync-dot" class="sync-dot loading"></div></div><div id="page-dashboard" class="page active"></div><div id="page-clanovi" class="page"></div><div id="page-uplate" class="page"></div><div id="page-projekcije" class="page"></div><nav class="bottom-nav"><button class="nav-btn active" onclick="goTo('dashboard')"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M4.93 4.93c4.08 4.08 4.08 10.66 0 14.74"/><path d="M19.07 4.93c-4.08 4.08-4.08 10.66 0 14.74"/><line x1="2" y1="12" x2="22" y2="12"/></svg>Pregled</button><button class="nav-btn" onclick="goTo('clanovi')"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>Članovi</button><button class="nav-btn" onclick="goTo('uplate')"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>Uplate</button><button class="nav-btn" onclick="goTo('projekcije')"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/><line x1="2" y1="20" x2="22" y2="20"/></svg>Projekcije</button></nav><div id="modal-clan" class="overlay"><div class="modal"><div class="modal-header"><span class="modal-title" id="modal-clan-title">Novi član</span><button class="close-btn" onclick="closeModal('modal-clan')"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#64748b" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button></div><div class="field-wrap"><label class="field-label">Ime i prezime *</label><input class="input-field" id="f-ime" type="text"/></div><div class="field-wrap"><label class="field-label">Datum rođenja</label><input class="input-field" id="f-datum" type="date"/></div><div class="field-wrap"><label class="field-label">Kategorija</label><select class="input-field" id="f-kat"><option>U8/Minibasket</option><option>U10</option><option>U12</option><option>U14</option></select></div><div class="field-wrap"><label class="field-label">Tip članarine</label><select class="input-field" id="f-tip"><option value="mesecna">Mesečna</option><option value="godisnja">Godišnja</option></select></div><div class="field-wrap"><label class="field-label">Kontakt roditelja</label><input class="input-field" id="f-tel" type="text"/></div><div class="field-wrap"><label class="field-label">Porodica *</label><select class="input-field" id="f-porodica" onchange="onPorodicaChange()"></select></div><div id="nova-box" class="nova-box" style="display:none"><div style="color:#64748b;font-size:11px;font-weight:600;text-transform:uppercase;margin-bottom:11px">Nova porodica</div><div class="field-wrap"><label class="field-label">Prezime</label><input class="input-field" id="f-prezime" type="text" oninput="updatePrev()"/></div><div class="field-wrap"><label class="field-label">Ime roditelja</label><input class="input-field" id="f-imerod" type="text" oninput="updatePrev()"/></div><div id="nova-hint" style="color:#64748b;font-size:12px;margin-top:-4px"></div></div><div id="price-prev" style="display:none" class="price-prev"><div><div id="pr-red" style="font-size:11px;font-weight:600;text-transform:uppercase;color:#94a3b8"></div><div id="pr-note" style="font-size:12px;color:#cbd5e1;margin-top:2px"></div></div><div id="pr-val" style="font-family:'Outfit',sans-serif;font-weight:800;font-size:19px"></div></div><button class="main-btn btn-orange" id="modal-clan-btn" onclick="sacuvajClana()">Dodaj člana</button></div></div><div id="modal-uplata" class="overlay"><div class="modal"><div class="modal-header"><span class="modal-title" id="modal-uplata-title">Uplata</span><button class="close-btn" onclick="closeModal('modal-uplata')"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#64748b" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button></div><div style="background:#0d948818;border:1px solid #0d948844;border-radius:10px;padding:12px 14px;margin-bottom:14px"><div style="color:#64748b;font-size:11px;font-weight:600;text-transform:uppercase;margin-bottom:3px">Preporučeni iznos</div><div id="uplata-rec" style="color:#0d9488;font-size:20px;font-weight:800;font-family:'Outfit',sans-serif"></div><div style="color:#475569;font-size:11px;margin-top:2px">Zbir mesečnih iznosa sve dece</div></div><div class="field-wrap"><label class="field-label">Iznos (RSD) *</label><input class="input-field" id="u-iznos" type="number"/></div><div class="field-wrap"><label class="field-label">Datum</label><input class="input-field" id="u-datum" type="date"/></div><div class="field-wrap"><label class="field-label">Napomena</label><input class="input-field" id="u-napomena" type="text"/></div><button class="main-btn btn-teal" onclick="sacuvajUplatu()">Zabeleži uplatu</button></div></div><div id="toast" class="toast"></div><script>const SUPA_URL="https://bhelrnjbxfhvpidxlebi.supabase.co";const SUPA_KEY="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJoZWxybmpieGZodnBpZHhsZWJpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzUwNTY1NjEsImV4cCI6MjA5MDYzMjU2MX0.yY8REVGgMDvLYV9LTt9q0td5bApCJuPhIhR8GIuQGig";async function supa(path,opts={}){const res=await fetch(SUPA_URL+"/rest/v1/"+path,{headers:{"apikey":SUPA_KEY,"Authorization":"Bearer "+SUPA_KEY,"Content-Type":"application/json","Prefer":opts.prefer||"return=representation",...opts.headers},method:opts.method||"GET",body:opts.body?JSON.stringify(opts.body):undefined});const txt=await res.text();if(!res.ok){let msg=txt;try{const j=JSON.parse(txt);msg=j.message||j.hint||j.details||txt;}catch(e){}throw new Error(msg);}return txt?JSON.parse(txt):[];}const KATEGORIJE=["U8/Minibasket","U10","U12","U14"];const CLANARINA={1:3200,2:2400};const MESECI=["Jan","Feb","Mar","Apr","Maj","Jun","Jul","Avg","Sep","Okt","Nov","Dec"];let porodice=[],clanovi=[],uplate=[],currentPage="dashboard",filterKat="Sve",searchStr="",editingId=null,uplataPorodicaId=null,saving=false;function getClanarina(n){return n>=3?0:(CLANARINA[n]??0);}function getBrojDece(pid,izuzmiId=null){return clanovi.filter(c=>c.porodica_id===pid&&c.id!==izuzmiId).length;}function slugify(s){return(s||"").toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g,"").replace(/đ/g,"dj").replace(/\s+/g,"_").replace(/[^a-z0-9_]/g,"");}function fmt(n){return(n??0).toLocaleString("sr-RS")+" RSD";}function todayStr(){return new Date().toISOString().split("T")[0];}function getDanasDo(pid){const u=uplate.filter(x=>x.porodica_id===pid);if(!u.length)return 999;const s=[...u].sort((a,b)=>new Date(b.datum)-new Date(a.datum));return Math.floor((new Date()-new Date(s[0].datum))/86400000);}function getStatus(d){if(d<=20)return{cls:"badge-green",label:"Aktivno"};if(d<=35)return{cls:"badge-yellow",label:"Upozorenje"};return{cls:"badge-red",label:"Dospelo"};}function getNazivP(pid){return(porodice.find(x=>x.id===pid)||{naziv:pid}).naziv;}function getUkupnoP(pid){return clanovi.filter(c=>c.porodica_id===pid).reduce((s,c)=>s+c.iznos,0);}function getDecaP(pid){return clanovi.filter(c=>c.porodica_id===pid);}function getZadnja(pid){const u=uplate.filter(x=>x.porodica_id===pid);if(!u.length)return null;return[...u].sort((a,b)=>new Date(b.datum)-new Date(a.datum))[0];}function toast(msg,type="ok"){const t=document.getElementById("toast");t.textContent=msg;t.className="toast show "+(type==="ok"?"ok":"err");setTimeout(()=>t.className="toast",3000);}function setSync(s){const d=document.getElementById("sync-dot");d.className="sync-dot"+(s==="loading"?" loading":s==="err"?" err":"");}async function loadAll(){setSync("loading");try{[porodice,clanovi,uplate]=await Promise.all([supa("porodice?order=naziv"),supa("clanovi?order=ime"),supa("uplate?order=datum.desc")]);setSync("ok");}catch(e){setSync("err");toast("Greška konekcije","err");}render();}function goTo(page){document.querySelectorAll(".page").forEach(p=>p.classList.remove("active"));document.querySelectorAll(".nav-btn").forEach(b=>b.classList.remove("active"));document.getElementById("page-"+page).classList.add("active");document.querySelectorAll(".nav-btn")[["dashboard","clanovi","uplate","projekcije"].indexOf(page)].classList.add("active");currentPage=page;render();}function openModal(id){document.getElementById(id).classList.add("open");}function closeModal(id){document.getElementById(id).classList.remove("open");editingId=null;}function svg(name,color,size=20){const s=`width="${size}" height="${size}" viewBox="0 0 24 24" fill="none" stroke="${color}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"`;const i={users:`<svg ${s}><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>`,payment:`<svg ${s}><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>`,chart:`<svg ${s}><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/><line x1="2" y1="20" x2="22" y2="20"/></svg>`,alert:`<svg ${s}><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>`,plus:`<svg ${s} stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>`,trash:`<svg ${s}><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>`,edit:`<svg ${s}><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>`,search:`<svg ${s}><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>`,trend:`<svg ${s}><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>`,family:`<svg ${s}><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>`};return i[name]||"";}function statCard(icon,label,val,sub,accent){return`<div class="card"><div class="card-accent" style="background:${accent}"></div><div class="card-icon" style="background:${accent}22">${svg(icon,accent,15)}</div><span class="card-label">${label}</span><div class="card-val">${val}</div>${sub?`<div class="card-sub">${sub}</div>`:""}</div>`;}function loading(){return`<div class="loading-screen"><div class="spinner"></div><div style="color:#64748b;font-size:14px">Učitavanje...</div></div>`;}function renderDashboard(){const d=new Date();const m=d.getMonth(),g=d.getFullYear();const pM=uplate.filter(u=>{const dd=new Date(u.datum);return dd.getMonth()===m&&dd.getFullYear()===g;}).reduce((s,u)=>s+u.iznos,0);const uk=uplate.reduce((s,u)=>s+u.iznos,0);const pids=[...new Set(clanovi.map(c=>c.porodica_id))];const dosp=pids.filter(p=>getDanasDo(p)>35);const upoz=pids.filter(p=>{const dd=getDanasDo(p);return dd>20&&dd<=35;});const prM=clanovi.filter(c=>c.tip==="mesecna").reduce((s,c)=>s+c.iznos,0);if(!clanovi.length){document.getElementById("page-dashboard").innerHTML=`<div style="margin-bottom:22px"><h2 style="color:#f1f5f9;font-size:22px;font-family:'Outfit',sans-serif;font-weight:700">Pregled kluba</h2><p style="color:#64748b;font-size:13px;margin-top:3px">${MESECI[m]} ${g}</p></div><div style="text-align:center;padding:60px 20px;color:#475569"><div style="font-size:48px;margin-bottom:16px">🏀</div><div style="font-size:16px;font-weight:600;color:#64748b;margin-bottom:8px">Klub je prazan</div><div style="font-size:13px">Dodaj prve članove u tabu Članovi</div></div>`;return;}let html=`<div style="margin-bottom:22px"><h2 style="color:#f1f5f9;font-size:22px;font-family:'Outfit',sans-serif;font-weight:700">Pregled kluba</h2><p style="color:#64748b;font-size:13px;margin-top:3px">${MESECI[m]} ${g}</p></div><div class="grid2">${statCard("users","Ukupno članova",clanovi.length,pids.length+" porodica","#3b82f6")}${statCard("payment","Prihod ovog mes.",Math.round(pM/1000)+"k RSD","","#e85d26")}${statCard("alert","Upozorenje",upoz.length,"porodica 21-35 dana","#f59e0b")}${statCard("trend","Proj. mesečno",Math.round(prM/1000)+"k RSD","","#0d9488")}</div>`;if(dosp.length){html+=`<div class="dospelo-box"><div style="display:flex;align-items:center;gap:7px;margin-bottom:11px">${svg("alert","#dc2626",14)}<span style="color:#dc2626;font-weight:700;font-size:11px;text-transform:uppercase">Dospele uplate</span></div>`;dosp.forEach(pid=>{const deca=getDecaP(pid);const ukp=getUkupnoP(pid);const dana=getDanasDo(pid);html+=`<div class="row-sep"><div><div style="color:#e2e8f0;font-size:14px;font-weight:600">${getNazivP(pid)}</div><div style="color:#64748b;font-size:12px">${deca.length} ${deca.length===1?"dete":"dece"} · ${fmt(ukp)}/mes</div></div><span class="badge badge-red">${dana} dana</span></div>`;});html+=`</div>`;}html+=`<div class="section"><div class="section-title">Prihodi po kategoriji</div>`;KATEGORIJE.forEach(k=>{const cK=clanovi.filter(c=>c.kategorija===k);const pr=cK.reduce((s,c)=>s+(c.tip==="mesecna"?c.iznos:c.iznos/12),0);html+=`<div style="margin-bottom:11px"><div style="display:flex;justify-content:space-between;margin-bottom:5px"><span style="color:#e2e8f0;font-size:13px">${k} <span style="color:#64748b">(${cK.length})</span></span><span style="color:#e85d26;font-size:13px;font-weight:600">${fmt(Math.round(pr))}</span></div><div class="bar-wrap"><div class="bar" style="width:${Math.min(100,(pr/5000)*100)}%"></div></div></div>`;});html+=`<div style="border-top:1px solid #2d3650;padding-top:11px;display:flex;justify-content:space-between"><span style="color:#94a3b8;font-size:13px">Ukupan prihod</span><span style="color:#f1f5f9;font-size:14px;font-weight:700">${fmt(uk)}</span></div></div>`;document.getElementById("page-dashboard").innerHTML=html;}function renderClanovi(){const filtered=clanovi.filter(c=>{const ms=c.ime.toLowerCase().includes(searchStr.toLowerCase())||getNazivP(c.porodica_id).toLowerCase().includes(searchStr.toLowerCase());return ms&&(filterKat==="Sve"||c.kategorija===filterKat);});let html=`<div class="page-header"><h2 class="page-title">Članovi</h2><button class="add-btn" onclick="openDodaj()">${svg("plus","#fff",14)} Dodaj</button></div><div class="search-wrap"><span class="search-icon">${svg("search","#64748b",14)}</span><input class="input-field search-input" type="text" placeholder="Ime ili porodica..." value="${searchStr.replace(/"/g,"&quot;")}" oninput="searchStr=this.value;renderClanovi()"/></div><div class="filter-row">${["Sve",...KATEGORIJE].map(k=>`<button class="filter-btn${filterKat===k?" active":""}" onclick="filterKat='${k}';renderClanovi()">${k}</button>`).join("")}</div>`;if(!filtered.length){html+=`<div class="empty">${clanovi.length?"Nema rezultata":"Nema članova. Dodaj prvog klikom na + Dodaj."}</div>`;}else{filtered.forEach(c=>{const dana=getDanasDo(c.porodica_id);const st=getStatus(dana);const rB=c.r_br===1?"badge-blue":c.r_br===2?"badge-amber":"badge-green";const rT=c.r_br===1?"1. dete":c.r_br===2?"2. dete":"3.+ dete";const z=getZadnja(c.porodica_id);const izS=c.iznos===0?`<span style="color:#0d9488;font-weight:700">Besplatno</span>`:fmt(c.iznos);html+=`<div class="member-card"><div style="display:flex;justify-content:space-between;align-items:flex-start"><div style="flex:1;min-width:0"><div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-bottom:3px"><span style="color:#f1f5f9;font-weight:700;font-size:15px">${c.ime}</span><span class="badge ${st.cls}">${st.label}</span><span class="badge ${rB}">${rT}</span></div><div style="color:#64748b;font-size:12px">${c.kategorija} · ${izS}</div><div style="color:#475569;font-size:11px;margin-top:2px">👨‍👩‍👦 ${getNazivP(c.porodica_id)}${c.tel?" · "+c.tel:""}</div>${z?`<div style="color:#334155;font-size:11px;margin-top:2px">Posl. uplata: ${z.datum} · ${fmt(z.iznos)}</div>`:""}</div><div class="btn-row"><button class="icon-btn icon-btn-green" onclick="openUplata('${c.porodica_id}')">${svg("payment","#0d9488",14)}</button><button class="icon-btn icon-btn-blue" onclick="openEdit(${c.id})">${svg("edit","#3b82f6",14)}</button><button class="icon-btn icon-btn-red" onclick="obrisiClana(${c.id})">${svg("trash","#dc2626",14)}</button></div></div></div>`;});}document.getElementById("page-clanovi").innerHTML=html;}function renderUplate(){let html=`<h2 class="page-title" style="margin-bottom:16px">Istorija uplata</h2>`;if(!uplate.length){html+=`<div class="empty">Nema evidentiranih uplata</div>`;}uplate.forEach(u=>{const deca=getDecaP(u.porodica_id);const imena=deca.map(d=>d.ime.split(" ")[0]).join(", ");html+=`<div class="member-card"><div style="display:flex;justify-content:space-between;align-items:flex-start"><div style="flex:1"><div style="color:#f1f5f9;font-weight:700;font-size:14px">${getNazivP(u.porodica_id)}</div><div style="color:#64748b;font-size:12px;margin-top:2px">📅 ${u.datum}${u.napomena?" · "+u.napomena:""}</div>${imena?`<div style="color:#475569;font-size:11px;margin-top:2px">${imena}</div>`:""}</div><div style="display:flex;align-items:center;gap:8px;margin-left:8px"><span style="color:#0d9488;font-weight:700;font-size:14px;white-space:nowrap">+${fmt(u.iznos)}</span><button class="icon-btn icon-btn-red" onclick="obrisiUplatu(${u.id})">${svg("trash","#dc2626",13)}</button></div></div></div>`;});document.getElementById("page-uplate").innerHTML=html;}function renderProjekcije(){const danas=new Date();const mes=Array.from({length:6},(_,i)=>{const d=new Date(danas);d.setMonth(d.getMonth()-(5-i));const m=d.getMonth(),g=d.getFullYear();const t=uplate.filter(u=>{const ud=new Date(u.datum);return ud.getMonth()===m&&ud.getFullYear()===g;}).reduce((s,u)=>s+u.iznos,0);return{mesec:MESECI[m],iznos:t};});const maxI=Math.max(...mes.map(m=>m.iznos),1);const prM=clanovi.reduce((s,c)=>s+(c.tip==="mesecna"?c.iznos:c.iznos/12),0);const pids=[...new Set(clanovi.map(c=>c.porodica_id))];const akt=pids.filter(p=>getDanasDo(p)<=35).length;let html=`<h2 class="page-title" style="margin-bottom:16px">Projekcije prihoda</h2><div class="grid2">${statCard("trend","Proj. mesečno",Math.round(prM/1000)+"k RSD","","#e85d26")}${statCard("chart","Proj. godišnje",Math.round(prM*12/1000)+"k RSD","","#3b82f6")}${statCard("family","Aktivne porodice",akt,"od "+pids.length+" ukupno","#0d9488")}${statCard("payment","Naplata",Math.round((akt/Math.max(pids.length,1))*100)+"%","stepen","#f59e0b")}</div><div class="section"><div class="section-title">Prihodi - poslednjih 6 meseci</div><div style="display:flex;align-items:flex-end;gap:8px;height:100px">`;mes.forEach(m=>{const h=Math.round((m.iznos/maxI)*80);html+=`<div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:4px"><div style="color:#64748b;font-size:10px">${m.iznos>0?Math.round(m.iznos/1000)+"k":""}</div><div style="width:100%;background:linear-gradient(180deg,#e85d26,#c2410c);border-radius:4px 4px 0 0;height:${h}px;min-height:${m.iznos>0?5:0}px"></div><div style="color:#64748b;font-size:10px">${m.mesec}</div></div>`;});html+=`</div></div><div class="section"><div class="section-title">Po kategoriji</div>`;KATEGORIJE.forEach(k=>{const cK=clanovi.filter(c=>c.kategorija===k);const aK=cK.filter(c=>getDanasDo(c.porodica_id)<=35);const pr=cK.reduce((s,c)=>s+(c.tip==="mesecna"?c.iznos:c.iznos/12),0);html+=`<div class="row-sep"><div><div style="color:#e2e8f0;font-size:14px;font-weight:600">${k}</div><div style="color:#64748b;font-size:12px">${aK.length}/${cK.length} aktivnih</div></div><div style="text-align:right"><div style="color:#e85d26;font-weight:700;font-size:13px">${fmt(Math.round(pr))}/mes</div><div style="color:#64748b;font-size:11px">${fmt(Math.round(pr*12))}/god</div></div></div>`;});html+=`</div>`;document.getElementById("page-projekcije").innerHTML=html;}function buildPorodicaSelect(sel){const s=document.getElementById("f-porodica");s.innerHTML=`<option value="">— Izaberi porodicu —</option>`;porodice.forEach(p=>{const br=clanovi.filter(c=>c.porodica_id===p.id).length;const o=document.createElement("option");o.value=p.id;o.textContent=`${p.naziv} (${br} ${br===1?"dete":"dece"})`;if(p.id===sel)o.selected=true;s.appendChild(o);});const n=document.createElement("option");n.value="__nova__";n.textContent="+ Nova porodica";s.appendChild(n);}function onPorodicaChange(){updatePrev();}function updatePrev(){const pid=document.getElementById("f-porodica").value;const nova=pid==="__nova__";document.getElementById("nova-box").style.display=nova?"block":"none";if(nova){const p=document.getElementById("f-prezime").value;const i=document.getElementById("f-imerod").value;document.getElementById("nova-hint").textContent=p&&i?`Prikazaće se kao: "${p} — ${i}"`:"";}const fPid=nova?slugify((document.getElementById("f-prezime").value||"")+"_"+(document.getElementById("f-imerod").value||"")):pid;const show=(pid&&pid!=="__nova__")||(nova&&document.getElementById("f-prezime").value&&document.getElementById("f-imerod").value);const prev=document.getElementById("price-prev");if(!show){prev.style.display="none";return;}const br=getBrojDece(fPid,editingId)+1;const iznos=getClanarina(br);const boja=iznos===0?"#0d9488":br===2?"#f59e0b":"#3b82f6";const bg=iznos===0?"#0d948818":br===2?"#f59e0b18":"#3b82f618";const bd=iznos===0?"#0d948844":br===2?"#f59e0b44":"#3b82f644";prev.style.display="flex";prev.style.background=bg;prev.style.border=`1px solid ${bd}`;document.getElementById("pr-red").textContent=br===1?"1. dete":br===2?"2. dete":`${br}. dete — besplatno`;document.getElementById("pr-note").textContent=br===1?"Puna cena":br===2?"Popust 25%":"Treće i više — bez naknade";document.getElementById("pr-val").style.color=boja;document.getElementById("pr-val").textContent=iznos===0?"Besplatno":`${iznos.toLocaleString("sr-RS")} RSD`;}function openDodaj(){editingId=null;document.getElementById("modal-clan-title").textContent="Novi član";document.getElementById("modal-clan-btn").textContent="Dodaj člana";document.getElementById("f-ime").value="";document.getElementById("f-datum").value="";document.getElementById("f-kat").value="U8/Minibasket";document.getElementById("f-tip").value="mesecna";document.getElementById("f-tel").value="";document.getElementById("f-prezime").value="";document.getElementById("f-imerod").value="";buildPorodicaSelect("");document.getElementById("nova-box").style.display="none";document.getElementById("price-prev").style.display="none";openModal("modal-clan");}function openEdit(id){const c=clanovi.find(x=>x.id===id);if(!c)return;editingId=id;document.getElementById("modal-clan-title").textContent="Uredi člana";document.getElementById("modal-clan-btn").textContent="Sačuvaj izmene";document.getElementById("f-ime").value=c.ime;document.getElementById("f-datum").value=c.datum_rodjenja||"";document.getElementById("f-kat").value=c.kategorija;document.getElementById("f-tip").value=c.tip;document.getElementById("f-tel").value=c.tel||"";buildPorodicaSelect(c.porodica_id);document.getElementById("nova-box").style.display="none";updatePrev();openModal("modal-clan");}async function sacuvajClana(){if(saving)return;const ime=document.getElementById("f-ime").value.trim();const datum=document.getElementById("f-datum").value;const kat=document.getElementById("f-kat").value;const tip=document.getElementById("f-tip").value;const tel=document.getElementById("f-tel").value.trim();const pidSel=document.getElementById("f-porodica").value;if(!ime||!pidSel){toast("Unesite ime i izaberite porodicu!","err");return;}saving=true;setSync("loading");try{let fPid=pidSel;if(pidSel==="__nova__"){const prez=document.getElementById("f-prezime").value.trim();const imed=document.getElementById("f-imerod").value.trim();if(!prez||!imed){toast("Unesite prezime i ime roditelja!","err");saving=false;return;}fPid=slugify(prez+"_"+imed);if(!porodice.find(p=>p.id===fPid)){const np=await supa("porodice",{method:"POST",body:{id:fPid,naziv:`${prez} — ${imed}`}});porodice.push(np[0]);}}const br=getBrojDece(fPid,editingId)+1;const iznos=getClanarina(br);const data={ime,datum_rodjenja:datum||null,kategorija:kat,tip,tel:tel||null,porodica_id:fPid,r_br:br,iznos};if(editingId){const upd=await supa(`clanovi?id=eq.${editingId}`,{method:"PATCH",body:data});const idx=clanovi.findIndex(c=>c.id===editingId);if(idx>-1)clanovi[idx]={...clanovi[idx],...upd[0]};toast("Član ažuriran ✓");}else{const nov=await supa("clanovi",{method:"POST",body:data});clanovi.push(nov[0]);clanovi.sort((a,b)=>a.ime.localeCompare(b.ime));toast("Član dodat ✓");}closeModal("modal-clan");setSync("ok");render();}catch(e){toast("Greška: "+(e.message||"").slice(0,80),"err");setSync("err");}saving=false;}async function obrisiClana(id){if(!confirm("Obrisati ovog člana?"))return;setSync("loading");try{await supa(`clanovi?id=eq.${id}`,{method:"DELETE",prefer:"return=minimal"});clanovi=clanovi.filter(c=>c.id!==id);toast("Član obrisan");setSync("ok");render();}catch(e){toast("Greška!","err");setSync("err");}}function openUplata(pid){uplataPorodicaId=pid;const uk=getUkupnoP(pid);document.getElementById("modal-uplata-title").textContent="Uplata — "+getNazivP(pid);document.getElementById("uplata-rec").textContent=fmt(uk);document.getElementById("u-iznos").value=uk;document.getElementById("u-datum").value=todayStr();document.getElementById("u-napomena").value="";openModal("modal-uplata");}async function sacuvajUplatu(){if(saving)return;const iznos=parseInt(document.getElementById("u-iznos").value);const datum=document.getElementById("u-datum").value;const nap=document.getElementById("u-napomena").value.trim();if(!iznos||!datum){toast("Unesite iznos i datum!","err");return;}saving=true;setSync("loading");try{const nov=await supa("uplate",{method:"POST",body:{porodica_id:uplataPorodicaId,datum,iznos,napomena:nap||null}});uplate.unshift(nov[0]);toast("Uplata zabeležena ✓");closeModal("modal-uplata");setSync("ok");render();}catch(e){toast("Greška!","err");setSync("err");}saving=false;}async function obrisiUplatu(id){if(!confirm("Obrisati ovu uplatu?"))return;setSync("loading");try{await supa(`uplate?id=eq.${id}`,{method:"DELETE",prefer:"return=minimal"});uplate=uplate.filter(u=>u.id!==id);toast("Uplata obrisana");setSync("ok");render();}catch(e){toast("Greška!","err");setSync("err");}}function render(){if(currentPage==="dashboard")renderDashboard();if(currentPage==="clanovi")renderClanovi();if(currentPage==="uplate")renderUplate();if(currentPage==="projekcije")renderProjekcije();}document.getElementById("page-dashboard").innerHTML=loading();loadAll();</script></body></html>
+<div class="header">
+  <div class="logo-box">
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M4.93 4.93c4.08 4.08 4.08 10.66 0 14.74"/><path d="M19.07 4.93c-4.08 4.08-4.08 10.66 0 14.74"/><line x1="2" y1="12" x2="22" y2="12"/></svg>
+  </div>
+  <div>
+    <div class="app-title">KK Evidencija</div>
+    <div class="app-sub">Košarkaški klub — Mlađe kategorije</div>
+  </div>
+  <div id="sync-dot" class="sync-dot loading"></div>
+</div>
+
+<div id="page-dashboard" class="page active"></div>
+<div id="page-clanovi" class="page"></div>
+<div id="page-uplate" class="page"></div>
+<div id="page-projekcije" class="page"></div>
+
+<nav class="bottom-nav">
+  <button class="nav-btn active" onclick="goTo('dashboard')">
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M4.93 4.93c4.08 4.08 4.08 10.66 0 14.74"/><path d="M19.07 4.93c-4.08 4.08-4.08 10.66 0 14.74"/><line x1="2" y1="12" x2="22" y2="12"/></svg>
+    Pregled
+  </button>
+  <button class="nav-btn" onclick="goTo('clanovi')">
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+    Članovi
+  </button>
+  <button class="nav-btn" onclick="goTo('uplate')">
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
+    Uplate
+  </button>
+  <button class="nav-btn" onclick="goTo('projekcije')">
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/><line x1="2" y1="20" x2="22" y2="20"/></svg>
+    Projekcije
+  </button>
+</nav>
+
+<!-- MODAL: Dodaj/Uredi člana -->
+<div id="modal-clan" class="overlay">
+  <div class="modal">
+    <div class="modal-header">
+      <span class="modal-title" id="modal-clan-title">Novi član</span>
+      <button class="close-btn" onclick="closeModal('modal-clan')"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#64748b" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+    </div>
+    <div class="field-wrap"><label class="field-label">Ime i prezime *</label><input class="input-field" id="f-ime" type="text" placeholder="npr. Nikola Petrović"/></div>
+    <div class="field-wrap"><label class="field-label">Datum rođenja</label><input class="input-field" id="f-datum" type="date"/></div>
+    <div class="field-wrap"><label class="field-label">Datum prvog treninga *</label><input class="input-field" id="f-trening" type="date" onchange="updatePrev()"/></div>
+    <div class="field-wrap"><label class="field-label">Kategorija</label>
+      <select class="input-field" id="f-kat"><option>U8/Minibasket</option><option>U10</option><option>U12</option><option>U14</option></select>
+    </div>
+    <div class="field-wrap"><label class="field-label">Kontakt roditelja</label><input class="input-field" id="f-tel" type="text" placeholder="06x-xxx-xxxx"/></div>
+    <div class="field-wrap"><label class="field-label">Porodica *</label>
+      <select class="input-field" id="f-porodica" onchange="onPorodicaChange()"></select>
+    </div>
+    <div id="nova-box" class="nova-box" style="display:none">
+      <div style="color:#64748b;font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.06em;margin-bottom:11px">Nova porodica</div>
+      <div class="field-wrap"><label class="field-label">Prezime</label><input class="input-field" id="f-prezime" type="text" oninput="updatePrev()"/></div>
+      <div class="field-wrap"><label class="field-label">Ime roditelja</label><input class="input-field" id="f-imerod" type="text" oninput="updatePrev()"/></div>
+      <div id="nova-hint" style="color:#64748b;font-size:12px;margin-top:-4px"></div>
+    </div>
+    <div id="price-prev" style="display:none" class="price-prev">
+      <div><div id="pr-red" style="font-size:11px;font-weight:600;text-transform:uppercase;color:#94a3b8"></div>
+      <div id="pr-note" style="font-size:12px;color:#cbd5e1;margin-top:2px"></div></div>
+      <div id="pr-val" style="font-family:'Outfit',sans-serif;font-weight:800;font-size:19px"></div>
+    </div>
+    <button class="main-btn btn-orange" id="modal-clan-btn" onclick="sacuvajClana()">Dodaj člana</button>
+  </div>
+</div>
+
+<!-- MODAL: Uplata po porodici -->
+<div id="modal-uplata" class="overlay">
+  <div class="modal">
+    <div class="modal-header">
+      <span class="modal-title" id="modal-uplata-title">Uplata</span>
+      <button class="close-btn" onclick="closeModal('modal-uplata')"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#64748b" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+    </div>
+    <div style="background:#0d948818;border:1px solid #0d948844;border-radius:10px;padding:12px 14px;margin-bottom:14px">
+      <div style="color:#64748b;font-size:11px;font-weight:600;text-transform:uppercase;margin-bottom:3px">Iznos za porodicu</div>
+      <div id="uplata-rec" style="color:#0d9488;font-size:20px;font-weight:800;font-family:'Outfit',sans-serif"></div>
+      <div style="color:#475569;font-size:11px;margin-top:2px">Zbir mesečnih iznosa sve dece</div>
+    </div>
+    <div class="field-wrap"><label class="field-label">Za koji mesec *</label>
+      <select class="input-field" id="u-mesec"></select>
+    </div>
+    <div class="field-wrap"><label class="field-label">Iznos uplate (RSD) *</label><input class="input-field" id="u-iznos" type="number" min="0"/></div>
+    <div class="field-wrap"><label class="field-label">Datum uplate</label><input class="input-field" id="u-datum" type="date"/></div>
+    <div class="field-wrap"><label class="field-label">Napomena</label><input class="input-field" id="u-napomena" type="text"/></div>
+    <button class="main-btn btn-teal" onclick="sacuvajUplatu()">Zabeleži uplatu</button>
+  </div>
+</div>
+
+<div id="toast" class="toast"></div>
+
+<script>
+// ═══════════════════════════════════════════
+// SUPABASE
+// ═══════════════════════════════════════════
+const SUPA_URL = "https://bhelrnjbxfhvpidxlebi.supabase.co";
+const SUPA_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJoZWxybmpieGZodnBpZHhsZWJpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzUwNTY1NjEsImV4cCI6MjA5MDYzMjU2MX0.yY8REVGgMDvLYV9LTt9q0td5bApCJuPhIhR8GIuQGig";
+
+async function supa(path, opts={}) {
+  const res = await fetch(SUPA_URL + "/rest/v1/" + path, {
+    headers: {
+      "apikey": SUPA_KEY,
+      "Authorization": "Bearer " + SUPA_KEY,
+      "Content-Type": "application/json",
+      "Prefer": opts.prefer || "return=representation",
+      ...opts.headers
+    },
+    method: opts.method || "GET",
+    body: opts.body ? JSON.stringify(opts.body) : undefined
+  });
+  const txt = await res.text();
+  if (!res.ok) {
+    let msg = txt;
+    try { const j=JSON.parse(txt); msg=j.message||j.hint||j.details||txt; } catch(e){}
+    throw new Error(msg);
+  }
+  return txt ? JSON.parse(txt) : [];
+}
+
+// ═══════════════════════════════════════════
+// KONSTANTE & HELPERS
+// ═══════════════════════════════════════════
+const KATEGORIJE = ["U8/Minibasket","U10","U12","U14"];
+const CLANARINA  = {1:3200, 2:2400};
+const MESECI_SR  = ["Januar","Februar","Mart","April","Maj","Jun","Jul","Avgust","Septembar","Oktobar","Novembar","Decembar"];
+const MESECI_KR  = ["Jan","Feb","Mar","Apr","Maj","Jun","Jul","Avg","Sep","Okt","Nov","Dec"];
+
+function getClanarina(n){ return n>=3?0:(CLANARINA[n]??0); }
+function getBrojDece(pid, izuzmiId=null){ return clanovi.filter(c=>c.porodica_id===pid&&c.id!==izuzmiId).length; }
+function slugify(s){ return(s||"").toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g,"").replace(/đ/g,"dj").replace(/\s+/g,"_").replace(/[^a-z0-9_]/g,""); }
+function fmt(n){ return(n??0).toLocaleString("sr-RS")+" RSD"; }
+function todayStr(){ return new Date().toISOString().split("T")[0]; }
+function getNazivP(pid){ return(porodice.find(x=>x.id===pid)||{naziv:pid}).naziv; }
+function getUkupnoP(pid){ return clanovi.filter(c=>c.porodica_id===pid).reduce((s,c)=>s+c.iznos,0); }
+function getDecaP(pid){ return clanovi.filter(c=>c.porodica_id===pid); }
+
+// Vraca string "YYYY-MM" za godinu/mesec
+function ym(year, month){ return year+"-"+String(month+1).padStart(2,"0"); }
+
+// Svi meseci od datuma prvog treninga do tekuceg meseca (ukljucujuci oba)
+function getMesecOd(datumTreninga){
+  if(!datumTreninga) return [];
+  const start = new Date(datumTreninga);
+  const now = new Date();
+  const result = [];
+  let y = start.getFullYear(), m = start.getMonth();
+  while(y < now.getFullYear() || (y === now.getFullYear() && m <= now.getMonth())){
+    result.push(ym(y,m));
+    m++; if(m>11){m=0;y++;}
+  }
+  return result;
+}
+
+// Placeni meseci za porodicu (iz uplata)
+function getPlaceniMeseci(pid){
+  return uplate.filter(u=>u.porodica_id===pid&&u.za_mesec).map(u=>u.za_mesec);
+}
+
+// Status porodice: koliko meseci nije placeno
+function getNeplaceniMeseci(pid){
+  const deca = getDecaP(pid);
+  if(!deca.length) return [];
+  // Najraniji datum treninga u porodici
+  const najraniji = deca.map(d=>d.datum_treninga).filter(Boolean).sort()[0];
+  if(!najraniji) return [];
+  const svi = getMesecOd(najraniji);
+  const placeni = getPlaceniMeseci(pid);
+  return svi.filter(m=>!placeni.includes(m));
+}
+
+function getStatus(pid){
+  const nep = getNeplaceniMeseci(pid);
+  if(!nep.length) return {cls:"badge-green", label:"Plaćeno"};
+  if(nep.length===1) return {cls:"badge-yellow", label:"1 mes. dug"};
+  return {cls:"badge-red", label:nep.length+" mes. dug"};
+}
+
+// ═══════════════════════════════════════════
+// STATE
+// ═══════════════════════════════════════════
+let porodice=[], clanovi=[], uplate=[];
+let currentPage="dashboard", filterKat="Sve", searchStr="";
+let editingId=null, uplataPorodicaId=null, saving=false;
+
+// ═══════════════════════════════════════════
+// TOAST & SYNC
+// ═══════════════════════════════════════════
+function toast(msg,type="ok"){
+  const t=document.getElementById("toast");
+  t.textContent=msg; t.className="toast show "+(type==="ok"?"ok":"err");
+  setTimeout(()=>t.className="toast",3000);
+}
+function setSync(s){
+  const d=document.getElementById("sync-dot");
+  d.className="sync-dot"+(s==="loading"?" loading":s==="err"?" err":"");
+}
+
+// ═══════════════════════════════════════════
+// LOAD
+// ═══════════════════════════════════════════
+async function loadAll(){
+  setSync("loading");
+  try {
+    [porodice,clanovi,uplate] = await Promise.all([
+      supa("porodice?order=naziv"),
+      supa("clanovi?order=ime"),
+      supa("uplate?order=datum.desc")
+    ]);
+    setSync("ok");
+  } catch(e){ setSync("err"); toast("Greška konekcije","err"); }
+  render();
+}
+
+// ═══════════════════════════════════════════
+// NAV
+// ═══════════════════════════════════════════
+function goTo(page){
+  document.querySelectorAll(".page").forEach(p=>p.classList.remove("active"));
+  document.querySelectorAll(".nav-btn").forEach(b=>b.classList.remove("active"));
+  document.getElementById("page-"+page).classList.add("active");
+  document.querySelectorAll(".nav-btn")[["dashboard","clanovi","uplate","projekcije"].indexOf(page)].classList.add("active");
+  currentPage=page; render();
+}
+function openModal(id){ document.getElementById(id).classList.add("open"); }
+function closeModal(id){ document.getElementById(id).classList.remove("open"); editingId=null; }
+
+// ═══════════════════════════════════════════
+// SVG
+// ═══════════════════════════════════════════
+function svg(name,color,size=20){
+  const s=`width="${size}" height="${size}" viewBox="0 0 24 24" fill="none" stroke="${color}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"`;
+  const i={
+    users:`<svg ${s}><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>`,
+    payment:`<svg ${s}><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>`,
+    chart:`<svg ${s}><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/><line x1="2" y1="20" x2="22" y2="20"/></svg>`,
+    alert:`<svg ${s}><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>`,
+    plus:`<svg ${s} stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>`,
+    trash:`<svg ${s}><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>`,
+    edit:`<svg ${s}><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>`,
+    search:`<svg ${s}><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>`,
+    trend:`<svg ${s}><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>`,
+    family:`<svg ${s}><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>`,
+    check:`<svg ${s} stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>`
+  };
+  return i[name]||"";
+}
+
+function statCard(icon,label,val,sub,accent){
+  return `<div class="card"><div class="card-accent" style="background:${accent}"></div>
+    <div class="card-icon" style="background:${accent}22">${svg(icon,accent,15)}</div>
+    <span class="card-label">${label}</span>
+    <div class="card-val">${val}</div>
+    ${sub?`<div class="card-sub">${sub}</div>`:""}</div>`;
+}
+function loading(){ return `<div class="loading-screen"><div class="spinner"></div><div style="color:#64748b;font-size:14px">Učitavanje...</div></div>`; }
+
+// ═══════════════════════════════════════════
+// DASHBOARD
+// ═══════════════════════════════════════════
+function renderDashboard(){
+  const d=new Date(); const m=d.getMonth(), g=d.getFullYear();
+  const tekuciMesec = ym(g,m);
+  const pids=[...new Set(clanovi.map(c=>c.porodica_id))];
+
+  if(!clanovi.length){
+    document.getElementById("page-dashboard").innerHTML=`
+    <div style="margin-bottom:22px"><h2 style="color:#f1f5f9;font-size:22px;font-family:'Outfit',sans-serif;font-weight:700">Pregled kluba</h2>
+    <p style="color:#64748b;font-size:13px;margin-top:3px">${MESECI_SR[m]} ${g}</p></div>
+    <div style="text-align:center;padding:60px 20px;color:#475569">
+      <div style="font-size:48px;margin-bottom:16px">🏀</div>
+      <div style="font-size:16px;font-weight:600;color:#64748b;margin-bottom:8px">Klub je prazan</div>
+      <div style="font-size:13px">Dodaj prve članove u tabu "Članovi"</div>
+    </div>`;
+    return;
+  }
+
+  // Porodice koje imaju neplaćen tekući mesec
+  const neplaceneDanas = pids.filter(pid=>{
+    const nep = getNeplaceniMeseci(pid);
+    return nep.includes(tekuciMesec);
+  });
+  // Porodice sa dugom (bilo koji mesec)
+  const saDugom = pids.filter(pid=>getNeplaceniMeseci(pid).length>0);
+  // Prihod tekuceg meseca
+  const prihodMes = uplate.filter(u=>{
+    return u.za_mesec===tekuciMesec;
+  }).reduce((s,u)=>s+u.iznos,0);
+  const ukupan = uplate.reduce((s,u)=>s+u.iznos,0);
+  const projM = clanovi.reduce((s,c)=>s+c.iznos,0);
+
+  let html=`
+  <div style="margin-bottom:22px">
+    <h2 style="color:#f1f5f9;font-size:22px;font-family:'Outfit',sans-serif;font-weight:700">Pregled kluba</h2>
+    <p style="color:#64748b;font-size:13px;margin-top:3px">${MESECI_SR[m]} ${g}</p>
+  </div>
+  <div class="grid2">
+    ${statCard("users","Ukupno članova",clanovi.length,pids.length+" porodica","#3b82f6")}
+    ${statCard("payment","Naplaćeno ovog mes.",Math.round(prihodMes/1000)+"k RSD","","#e85d26")}
+    ${statCard("alert","Neplaćen ovaj mes.",neplaceneDanas.length,"porodica","#f59e0b")}
+    ${statCard("trend","Proj. mesečno",Math.round(projM/1000)+"k RSD","","#0d9488")}
+  </div>`;
+
+  if(saDugom.length){
+    html+=`<div class="dospelo-box">
+      <div style="display:flex;align-items:center;gap:7px;margin-bottom:11px">
+        ${svg("alert","#dc2626",14)}
+        <span style="color:#dc2626;font-weight:700;font-size:11px;text-transform:uppercase;letter-spacing:0.06em">Porodice sa dugom</span>
+      </div>`;
+    saDugom.forEach(pid=>{
+      const nep=getNeplaceniMeseci(pid);
+      const deca=getDecaP(pid);
+      const uk=getUkupnoP(pid);
+      html+=`<div class="row-sep">
+        <div>
+          <div style="color:#e2e8f0;font-size:14px;font-weight:600">${getNazivP(pid)}</div>
+          <div style="color:#64748b;font-size:12px">${deca.length} ${deca.length===1?"dete":"dece"} · ${fmt(uk)}/mes</div>
+          <div style="margin-top:3px">${nep.slice(-3).map(mes=>{
+            const [y,mo]=mes.split("-");
+            return `<span class="dug-chip">${MESECI_KR[parseInt(mo)-1]} ${y}</span>`;
+          }).join("")}${nep.length>3?`<span style="color:#64748b;font-size:11px"> +${nep.length-3}</span>`:""}</div>
+        </div>
+        <span class="badge badge-red">${nep.length} mes.</span>
+      </div>`;
+    });
+    html+=`</div>`;
+  }
+
+  html+=`<div class="section"><div class="section-title">Prihodi po kategoriji</div>`;
+  KATEGORIJE.forEach(k=>{
+    const cK=clanovi.filter(c=>c.kategorija===k);
+    const pr=cK.reduce((s,c)=>s+c.iznos,0);
+    html+=`<div style="margin-bottom:11px">
+      <div style="display:flex;justify-content:space-between;margin-bottom:5px">
+        <span style="color:#e2e8f0;font-size:13px">${k} <span style="color:#64748b">(${cK.length})</span></span>
+        <span style="color:#e85d26;font-size:13px;font-weight:600">${fmt(pr)}</span>
+      </div>
+      <div class="bar-wrap"><div class="bar" style="width:${Math.min(100,(pr/5000)*100)}%"></div></div>
+    </div>`;
+  });
+  html+=`<div style="border-top:1px solid #2d3650;padding-top:11px;display:flex;justify-content:space-between">
+    <span style="color:#94a3b8;font-size:13px">Ukupan prihod (sve uplate)</span>
+    <span style="color:#f1f5f9;font-size:14px;font-weight:700">${fmt(ukupan)}</span>
+  </div></div>`;
+
+  document.getElementById("page-dashboard").innerHTML=html;
+}
+
+// ═══════════════════════════════════════════
+// ČLANOVI
+// ═══════════════════════════════════════════
+function renderClanovi(){
+  const filtered=clanovi.filter(c=>{
+    const ms=c.ime.toLowerCase().includes(searchStr.toLowerCase())||getNazivP(c.porodica_id).toLowerCase().includes(searchStr.toLowerCase());
+    return ms&&(filterKat==="Sve"||c.kategorija===filterKat);
+  });
+
+  let html=`
+  <div class="page-header">
+    <h2 class="page-title">Članovi</h2>
+    <button class="add-btn" onclick="openDodaj()">${svg("plus","#fff",14)} Dodaj</button>
+  </div>
+  <div class="search-wrap">
+    <span class="search-icon">${svg("search","#64748b",14)}</span>
+    <input class="input-field search-input" type="text" placeholder="Ime ili porodica..." value="${searchStr.replace(/"/g,"&quot;")}" oninput="searchStr=this.value;renderClanovi()"/>
+  </div>
+  <div class="filter-row">
+    ${["Sve",...KATEGORIJE].map(k=>`<button class="filter-btn${filterKat===k?" active":""}" onclick="filterKat='${k}';renderClanovi()">${k}</button>`).join("")}
+  </div>`;
+
+  if(!filtered.length){
+    html+=`<div class="empty">${clanovi.length?"Nema rezultata pretrage":"Nema članova. Dodaj prvog klikom na + Dodaj."}</div>`;
+  } else {
+    filtered.forEach(c=>{
+      const st=getStatus(c.porodica_id);
+      const nep=getNeplaceniMeseci(c.porodica_id);
+      const rB=c.r_br===1?"badge-blue":c.r_br===2?"badge-amber":"badge-green";
+      const rT=c.r_br===1?"1. dete":c.r_br===2?"2. dete":"3.+ dete";
+      const izS=c.iznos===0?`<span style="color:#0d9488;font-weight:700">Besplatno</span>`:fmt(c.iznos);
+      const trenDatum=c.datum_treninga?`<br><span style="color:#475569">Trening od: ${c.datum_treninga}</span>`:"";
+      const nepHtml=nep.length?`<div style="margin-top:4px">${nep.slice(-2).map(mes=>{
+        const [y,mo]=mes.split("-");
+        return `<span class="dug-chip">${MESECI_KR[parseInt(mo)-1]} ${y}</span>`;
+      }).join("")}${nep.length>2?`<span style="color:#dc2626;font-size:11px"> +${nep.length-2}</span>`:""}</div>`:"";
+
+      html+=`<div class="member-card">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start">
+          <div style="flex:1;min-width:0">
+            <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-bottom:3px">
+              <span style="color:#f1f5f9;font-weight:700;font-size:15px">${c.ime}</span>
+              <span class="badge ${st.cls}">${st.label}</span>
+              <span class="badge ${rB}">${rT}</span>
+            </div>
+            <div style="color:#64748b;font-size:12px">${c.kategorija} · ${izS}${trenDatum}</div>
+            <div style="color:#475569;font-size:11px;margin-top:2px">👨‍👩‍👦 ${getNazivP(c.porodica_id)}${c.tel?" · "+c.tel:""}</div>
+            ${nepHtml}
+          </div>
+          <div class="btn-row">
+            <button class="icon-btn icon-btn-green" title="Uplata" onclick="openUplata('${c.porodica_id}')">${svg("payment","#0d9488",14)}</button>
+            <button class="icon-btn icon-btn-blue" title="Uredi" onclick="openEdit(${c.id})">${svg("edit","#3b82f6",14)}</button>
+            <button class="icon-btn icon-btn-red" title="Obriši" onclick="obrisiClana(${c.id})">${svg("trash","#dc2626",14)}</button>
+          </div>
+        </div>
+      </div>`;
+    });
+  }
+  document.getElementById("page-clanovi").innerHTML=html;
+}
+
+// ═══════════════════════════════════════════
+// UPLATE
+// ═══════════════════════════════════════════
+function renderUplate(){
+  const sorted=[...uplate].sort((a,b)=>new Date(b.datum)-new Date(a.datum));
+  let html=`<h2 class="page-title" style="margin-bottom:16px">Istorija uplata</h2>`;
+  if(!sorted.length){ html+=`<div class="empty">Nema evidentiranih uplata</div>`; }
+  sorted.forEach(u=>{
+    const deca=getDecaP(u.porodica_id);
+    const imena=deca.map(d=>d.ime.split(" ")[0]).join(", ");
+    const mesLabel=u.za_mesec?`<span class="ok-chip">${formatMesec(u.za_mesec)}</span>`:"";
+    html+=`<div class="member-card">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start">
+        <div style="flex:1">
+          <div style="color:#f1f5f9;font-weight:700;font-size:14px">${getNazivP(u.porodica_id)}</div>
+          <div style="color:#64748b;font-size:12px;margin-top:2px">📅 ${u.datum}${u.napomena?" · "+u.napomena:""}</div>
+          <div style="margin-top:3px">${mesLabel}${imena?`<span style="color:#475569;font-size:11px;margin-left:4px">${imena}</span>`:""}</div>
+        </div>
+        <div style="display:flex;align-items:center;gap:8px;margin-left:8px">
+          <span style="color:#0d9488;font-weight:700;font-size:14px;white-space:nowrap">+${fmt(u.iznos)}</span>
+          <button class="icon-btn icon-btn-red" onclick="obrisiUplatu(${u.id})">${svg("trash","#dc2626",13)}</button>
+        </div>
+      </div>
+    </div>`;
+  });
+  document.getElementById("page-uplate").innerHTML=html;
+}
+
+function formatMesec(ym){
+  if(!ym) return "";
+  const [y,m]=ym.split("-");
+  return MESECI_SR[parseInt(m)-1]+" "+y;
+}
+
+// ═══════════════════════════════════════════
+// PROJEKCIJE
+// ═══════════════════════════════════════════
+function renderProjekcije(){
+  const danas=new Date();
+  const mesecni=Array.from({length:6},(_,i)=>{
+    const d=new Date(danas); d.setMonth(d.getMonth()-(5-i));
+    const mesKljuc=ym(d.getFullYear(),d.getMonth());
+    const total=uplate.filter(u=>u.za_mesec===mesKljuc).reduce((s,u)=>s+u.iznos,0);
+    return {mesec:MESECI_KR[d.getMonth()],iznos:total};
+  });
+  const maxIz=Math.max(...mesecni.map(m=>m.iznos),1);
+  const projM=clanovi.reduce((s,c)=>s+c.iznos,0);
+  const pids=[...new Set(clanovi.map(c=>c.porodica_id))];
+  const tekuciMesec=ym(danas.getFullYear(),danas.getMonth());
+  const akt=pids.filter(pid=>!getNeplaceniMeseci(pid).includes(tekuciMesec)).length;
+
+  let html=`<h2 class="page-title" style="margin-bottom:16px">Projekcije prihoda</h2>
+  <div class="grid2">
+    ${statCard("trend","Proj. mesečno",Math.round(projM/1000)+"k RSD","","#e85d26")}
+    ${statCard("chart","Proj. godišnje",Math.round(projM*12/1000)+"k RSD","","#3b82f6")}
+    ${statCard("family","Platile ovaj mes.",akt,"od "+pids.length+" porodica","#0d9488")}
+    ${statCard("payment","Naplata",Math.round((akt/Math.max(pids.length,1))*100)+"%","stepen","#f59e0b")}
+  </div>
+  <div class="section">
+    <div class="section-title">Naplaćeno — poslednjih 6 meseci</div>
+    <div style="display:flex;align-items:flex-end;gap:8px;height:100px">`;
+  mesecni.forEach(m=>{
+    const h=Math.round((m.iznos/maxIz)*80);
+    html+=`<div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:4px">
+      <div style="color:#64748b;font-size:10px">${m.iznos>0?Math.round(m.iznos/1000)+"k":""}</div>
+      <div style="width:100%;background:linear-gradient(180deg,#e85d26,#c2410c);border-radius:4px 4px 0 0;height:${h}px;min-height:${m.iznos>0?5:0}px"></div>
+      <div style="color:#64748b;font-size:10px">${m.mesec}</div>
+    </div>`;
+  });
+  html+=`</div></div><div class="section"><div class="section-title">Po kategoriji</div>`;
+  KATEGORIJE.forEach(k=>{
+    const cK=clanovi.filter(c=>c.kategorija===k);
+    const aktK=cK.filter(c=>!getNeplaceniMeseci(c.porodica_id).includes(tekuciMesec));
+    const pr=cK.reduce((s,c)=>s+c.iznos,0);
+    html+=`<div class="row-sep">
+      <div><div style="color:#e2e8f0;font-size:14px;font-weight:600">${k}</div>
+      <div style="color:#64748b;font-size:12px">${aktK.length}/${cK.length} platilo ovaj mes.</div></div>
+      <div style="text-align:right">
+        <div style="color:#e85d26;font-weight:700;font-size:13px">${fmt(pr)}/mes</div>
+        <div style="color:#64748b;font-size:11px">${fmt(pr*12)}/god</div>
+      </div>
+    </div>`;
+  });
+  html+=`</div>`;
+  document.getElementById("page-projekcije").innerHTML=html;
+}
+
+// ═══════════════════════════════════════════
+// MODAL — DODAJ/UREDI ČLANA
+// ═══════════════════════════════════════════
+function buildPorodicaSelect(selId){
+  const sel=document.getElementById("f-porodica");
+  sel.innerHTML=`<option value="">— Izaberi porodicu —</option>`;
+  porodice.forEach(p=>{
+    const br=clanovi.filter(c=>c.porodica_id===p.id).length;
+    const o=document.createElement("option");
+    o.value=p.id; o.textContent=`${p.naziv} (${br} ${br===1?"dete":"dece"})`;
+    if(p.id===selId) o.selected=true;
+    sel.appendChild(o);
+  });
+  const n=document.createElement("option"); n.value="__nova__"; n.textContent="+ Nova porodica";
+  sel.appendChild(n);
+}
+
+function onPorodicaChange(){ updatePrev(); }
+
+function updatePrev(){
+  const pid=document.getElementById("f-porodica").value;
+  const nova=pid==="__nova__";
+  document.getElementById("nova-box").style.display=nova?"block":"none";
+  if(nova){
+    const p=document.getElementById("f-prezime").value;
+    const i=document.getElementById("f-imerod").value;
+    document.getElementById("nova-hint").textContent=p&&i?`Prikazaće se kao: "${p} — ${i}"`:"";
+  }
+  const fPid=nova?slugify((document.getElementById("f-prezime").value||"")+"_"+(document.getElementById("f-imerod").value||"")):pid;
+  const show=(pid&&pid!=="__nova__")||(nova&&document.getElementById("f-prezime").value&&document.getElementById("f-imerod").value);
+  const prev=document.getElementById("price-prev");
+  if(!show){prev.style.display="none";return;}
+  const br=getBrojDece(fPid,editingId)+1;
+  const iznos=getClanarina(br);
+  const boja=iznos===0?"#0d9488":br===2?"#f59e0b":"#3b82f6";
+  const bg=iznos===0?"#0d948818":br===2?"#f59e0b18":"#3b82f618";
+  const bd=iznos===0?"#0d948844":br===2?"#f59e0b44":"#3b82f644";
+  prev.style.display="flex"; prev.style.background=bg; prev.style.border=`1px solid ${bd}`;
+  document.getElementById("pr-red").textContent=br===1?"1. dete":br===2?"2. dete":`${br}. dete — besplatno`;
+  document.getElementById("pr-note").textContent=br===1?"Puna cena":br===2?"Popust 25%":"Treće i više — bez naknade";
+  document.getElementById("pr-val").style.color=boja;
+  document.getElementById("pr-val").textContent=iznos===0?"Besplatno":`${iznos.toLocaleString("sr-RS")} RSD`;
+}
+
+function openDodaj(){
+  editingId=null;
+  document.getElementById("modal-clan-title").textContent="Novi član";
+  document.getElementById("modal-clan-btn").textContent="Dodaj člana";
+  document.getElementById("f-ime").value="";
+  document.getElementById("f-datum").value="";
+  document.getElementById("f-trening").value=todayStr();
+  document.getElementById("f-kat").value="U8/Minibasket";
+  document.getElementById("f-tel").value="";
+  document.getElementById("f-prezime").value="";
+  document.getElementById("f-imerod").value="";
+  buildPorodicaSelect("");
+  document.getElementById("nova-box").style.display="none";
+  document.getElementById("price-prev").style.display="none";
+  openModal("modal-clan");
+}
+
+function openEdit(id){
+  const c=clanovi.find(x=>x.id===id); if(!c) return;
+  editingId=id;
+  document.getElementById("modal-clan-title").textContent="Uredi člana";
+  document.getElementById("modal-clan-btn").textContent="Sačuvaj izmene";
+  document.getElementById("f-ime").value=c.ime;
+  document.getElementById("f-datum").value=c.datum_rodjenja||"";
+  document.getElementById("f-trening").value=c.datum_treninga||"";
+  document.getElementById("f-kat").value=c.kategorija;
+  document.getElementById("f-tel").value=c.tel||"";
+  buildPorodicaSelect(c.porodica_id);
+  document.getElementById("nova-box").style.display="none";
+  updatePrev();
+  openModal("modal-clan");
+}
+
+async function sacuvajClana(){
+  if(saving) return;
+  const ime=document.getElementById("f-ime").value.trim();
+  const datum=document.getElementById("f-datum").value;
+  const trening=document.getElementById("f-trening").value;
+  const kat=document.getElementById("f-kat").value;
+  const tel=document.getElementById("f-tel").value.trim();
+  const pidSel=document.getElementById("f-porodica").value;
+  if(!ime||!pidSel||!trening){toast("Unesite ime, datum treninga i porodicu!","err");return;}
+
+  saving=true; setSync("loading");
+  try {
+    let fPid=pidSel;
+    if(pidSel==="__nova__"){
+      const prez=document.getElementById("f-prezime").value.trim();
+      const imed=document.getElementById("f-imerod").value.trim();
+      if(!prez||!imed){toast("Unesite prezime i ime roditelja!","err");saving=false;return;}
+      fPid=slugify(prez+"_"+imed);
+      if(!porodice.find(p=>p.id===fPid)){
+        const np=await supa("porodice",{method:"POST",body:{id:fPid,naziv:`${prez} — ${imed}`}});
+        porodice.push(np[0]);
+      }
+    }
+    const br=getBrojDece(fPid,editingId)+1;
+    const iznos=getClanarina(br);
+    const data={ime,datum_rodjenja:datum||null,datum_treninga:trening,kategorija:kat,tel:tel||null,porodica_id:fPid,r_br:br,iznos};
+    if(editingId){
+      const upd=await supa(`clanovi?id=eq.${editingId}`,{method:"PATCH",body:data});
+      const idx=clanovi.findIndex(c=>c.id===editingId);
+      if(idx>-1) clanovi[idx]={...clanovi[idx],...upd[0]};
+      toast("Član ažuriran ✓");
+    } else {
+      const nov=await supa("clanovi",{method:"POST",body:data});
+      clanovi.push(nov[0]);
+      clanovi.sort((a,b)=>a.ime.localeCompare(b.ime));
+      toast("Član dodat ✓");
+    }
+    closeModal("modal-clan"); setSync("ok"); render();
+  } catch(e){ toast("Greška: "+(e.message||"").slice(0,80),"err"); setSync("err"); }
+  saving=false;
+}
+
+async function obrisiClana(id){
+  if(!confirm("Obrisati ovog člana?")) return;
+  setSync("loading");
+  try {
+    await supa(`clanovi?id=eq.${id}`,{method:"DELETE",prefer:"return=minimal"});
+    clanovi=clanovi.filter(c=>c.id!==id);
+    toast("Član obrisan"); setSync("ok"); render();
+  } catch(e){ toast("Greška!","err"); setSync("err"); }
+}
+
+// ═══════════════════════════════════════════
+// MODAL — UPLATA
+// ═══════════════════════════════════════════
+function buildMesecSelect(pid){
+  const sel=document.getElementById("u-mesec");
+  sel.innerHTML="";
+  // Ponudi neplaćene mesece + tekuci mesec
+  const nep=getNeplaceniMeseci(pid);
+  const danas=new Date();
+  const tekuci=ym(danas.getFullYear(),danas.getMonth());
+  // Skup meseci za prikaz: neplaceni + tekuci (ako nije vec tu)
+  const opcije=[...nep];
+  if(!opcije.includes(tekuci)) opcije.push(tekuci);
+  opcije.sort();
+  opcije.forEach(m=>{
+    const o=document.createElement("option");
+    o.value=m; o.textContent=formatMesec(m)+(nep.includes(m)?" ⚠️":"");
+    sel.appendChild(o);
+  });
+  // Default: tekuci mesec ako postoji, inace prvi neplaceni
+  if(opcije.includes(tekuci)) sel.value=tekuci;
+  else if(opcije.length) sel.value=opcije[0];
+}
+
+function openUplata(pid){
+  uplataPorodicaId=pid;
+  const uk=getUkupnoP(pid);
+  document.getElementById("modal-uplata-title").textContent="Uplata — "+getNazivP(pid);
+  document.getElementById("uplata-rec").textContent=fmt(uk);
+  document.getElementById("u-iznos").value=uk;
+  document.getElementById("u-datum").value=todayStr();
+  document.getElementById("u-napomena").value="";
+  buildMesecSelect(pid);
+  openModal("modal-uplata");
+}
+
+async function sacuvajUplatu(){
+  if(saving) return;
+  const iznos=parseInt(document.getElementById("u-iznos").value);
+  const datum=document.getElementById("u-datum").value;
+  const nap=document.getElementById("u-napomena").value.trim();
+  const zaMesec=document.getElementById("u-mesec").value;
+  if(!iznos||!datum||!zaMesec){toast("Unesite iznos, datum i mesec!","err");return;}
+  saving=true; setSync("loading");
+  try {
+    const nov=await supa("uplate",{method:"POST",body:{porodica_id:uplataPorodicaId,datum,iznos,napomena:nap||null,za_mesec:zaMesec}});
+    uplate.unshift(nov[0]);
+    toast("Uplata zabeležena ✓");
+    closeModal("modal-uplata"); setSync("ok"); render();
+  } catch(e){ toast("Greška: "+(e.message||"").slice(0,80),"err"); setSync("err"); }
+  saving=false;
+}
+
+async function obrisiUplatu(id){
+  if(!confirm("Obrisati ovu uplatu?")) return;
+  setSync("loading");
+  try {
+    await supa(`uplate?id=eq.${id}`,{method:"DELETE",prefer:"return=minimal"});
+    uplate=uplate.filter(u=>u.id!==id);
+    toast("Uplata obrisana"); setSync("ok"); render();
+  } catch(e){ toast("Greška!","err"); setSync("err"); }
+}
+
+// ═══════════════════════════════════════════
+// MAIN
+// ═══════════════════════════════════════════
+function render(){
+  if(currentPage==="dashboard")   renderDashboard();
+  if(currentPage==="clanovi")     renderClanovi();
+  if(currentPage==="uplate")      renderUplate();
+  if(currentPage==="projekcije")  renderProjekcije();
+}
+
+document.getElementById("page-dashboard").innerHTML=loading();
+loadAll();
+</script>
+</body>
+</html>
