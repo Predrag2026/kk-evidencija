@@ -256,16 +256,25 @@ function getPlaceniMeseci(pid){
   return uplate.filter(u=>u.porodica_id===pid&&u.za_mesec).map(u=>u.za_mesec);
 }
 
-// Status porodice: koliko meseci nije placeno
+// Status porodice: neplaceni meseci se racunaju po svakom detetu posebno
+// Mesec se smatra dugovanim ako BILO KOJE dete duguje taj mesec
 function getNeplaceniMeseci(pid){
   const deca = getDecaP(pid);
   if(!deca.length) return [];
-  // Najraniji datum treninga u porodici
-  const najraniji = deca.map(d=>d.datum_treninga).filter(Boolean).sort()[0];
-  if(!najraniji) return [];
-  const svi = getMesecOd(najraniji);
   const placeni = getPlaceniMeseci(pid);
-  return svi.filter(m=>!placeni.includes(m));
+
+  // Skup svih meseci koje duguje bar jedno dete
+  const dugSet = new Set();
+  deca.forEach(dete => {
+    if(!dete.datum_treninga) return;
+    // Meseci od datuma treninga tog deteta do danas
+    const meseciDeteta = getMesecOd(dete.datum_treninga);
+    meseciDeteta.forEach(m => {
+      if(!placeni.includes(m)) dugSet.add(m);
+    });
+  });
+
+  return [...dugSet].sort();
 }
 
 function getStatus(pid){
