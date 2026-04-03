@@ -170,24 +170,58 @@ select option{background:#1a1f2e;color:#e2e8f0}
   </div>
 </div>
 
-<!-- MODAL: Uplata po porodici -->
+<!-- MODAL: Uplata -->
 <div id="modal-uplata" class="overlay">
   <div class="modal">
     <div class="modal-header">
-      <span class="modal-title" id="modal-uplata-title">Uplata</span>
+      <span class="modal-title">Nova uplata</span>
       <button class="close-btn" onclick="closeModal('modal-uplata')"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#64748b" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
     </div>
-    <div style="background:#0d948818;border:1px solid #0d948844;border-radius:10px;padding:12px 14px;margin-bottom:14px">
-      <div style="color:#64748b;font-size:11px;font-weight:600;text-transform:uppercase;margin-bottom:3px">Iznos za porodicu</div>
-      <div id="uplata-rec" style="color:#0d9488;font-size:20px;font-weight:800;font-family:'Outfit',sans-serif"></div>
-      <div style="color:#475569;font-size:11px;margin-top:2px">Zbir mesečnih iznosa sve dece</div>
+
+    <!-- Porodica -->
+    <div class="field-wrap">
+      <label class="field-label">Porodica *</label>
+      <select class="input-field" id="u-porodica" onchange="onUplataPorodicaChange()">
+        <option value="">— Izaberi porodicu —</option>
+      </select>
     </div>
-    <div class="field-wrap"><label class="field-label">Za koji mesec *</label>
-      <select class="input-field" id="u-mesec"></select>
+
+    <!-- Iznos -->
+    <div class="field-wrap">
+      <label class="field-label">Iznos uplate (RSD) *</label>
+      <input class="input-field" id="u-iznos" type="number" min="0" oninput="onUplataIznosChange()"/>
     </div>
-    <div class="field-wrap"><label class="field-label">Iznos uplate (RSD) *</label><input class="input-field" id="u-iznos" type="number" min="0"/></div>
-    <div class="field-wrap"><label class="field-label">Datum uplate</label><input class="input-field" id="u-datum" type="date"/></div>
-    <div class="field-wrap"><label class="field-label">Napomena</label><input class="input-field" id="u-napomena" type="text"/></div>
+
+    <!-- Preporuceni iznos -->
+    <div id="u-preporuka" style="display:none;background:#0d948818;border:1px solid #0d948844;border-radius:10px;padding:10px 14px;margin-bottom:13px">
+      <div style="color:#64748b;font-size:11px;font-weight:600;text-transform:uppercase;margin-bottom:2px">Preporučeni iznos</div>
+      <div id="u-preporuka-val" style="color:#0d9488;font-size:18px;font-weight:800;font-family:'Outfit',sans-serif"></div>
+      <div style="color:#475569;font-size:11px;margin-top:1px">Zbir mesečnih iznosa sve dece</div>
+    </div>
+
+    <!-- Neplaćeni meseci — višestruki odabir -->
+    <div id="u-meseci-box" style="display:none">
+      <label class="field-label" style="margin-bottom:8px">Odaberi mesec/mesece *</label>
+      <div id="u-meseci-lista" style="display:flex;flex-direction:column;gap:6px;margin-bottom:13px"></div>
+      <!-- Višak — ako iznos prelazi dugovanje odabranih meseci -->
+      <div id="u-visak-box" style="display:none;background:#f59e0b18;border:1px solid #f59e0b44;border-radius:10px;padding:10px 14px;margin-bottom:13px">
+        <div style="color:#f59e0b;font-size:12px;font-weight:600">Iznos prelazi dugovanje za odabrane mesece</div>
+        <div id="u-visak-val" style="color:#f59e0b;font-size:13px;font-weight:700;margin-top:2px"></div>
+      </div>
+    </div>
+
+    <!-- Datum -->
+    <div class="field-wrap">
+      <label class="field-label">Datum uplate</label>
+      <input class="input-field" id="u-datum" type="date"/>
+    </div>
+
+    <!-- Napomena -->
+    <div class="field-wrap">
+      <label class="field-label">Napomena (opciono)</label>
+      <input class="input-field" id="u-napomena" type="text" placeholder="Slobodan tekst..."/>
+    </div>
+
     <button class="main-btn btn-teal" onclick="sacuvajUplatu()">Zabeleži uplatu</button>
   </div>
 </div>
@@ -507,7 +541,11 @@ function renderClanovi(){
 // ═══════════════════════════════════════════
 function renderUplate(){
   const sorted=[...uplate].sort((a,b)=>new Date(b.datum)-new Date(a.datum));
-  let html=`<h2 class="page-title" style="margin-bottom:16px">Istorija uplata</h2>`;
+  let html=`
+  <div class="page-header">
+    <h2 class="page-title">Uplate</h2>
+    <button class="add-btn" onclick="openNovaUplata()">${svg("plus","#fff",14)} Dodaj</button>
+  </div>`;
   if(!sorted.length){ html+=`<div class="empty">Nema evidentiranih uplata</div>`; }
   sorted.forEach(u=>{
     const deca=getDecaP(u.porodica_id);
@@ -721,51 +759,161 @@ async function obrisiClana(id){
 // ═══════════════════════════════════════════
 // MODAL — UPLATA
 // ═══════════════════════════════════════════
-function buildMesecSelect(pid){
-  const sel=document.getElementById("u-mesec");
-  sel.innerHTML="";
-  // Ponudi neplaćene mesece + tekuci mesec
+// Selektovani meseci u modalu
+let odabraniMeseci = [];
+
+function buildUplataPorodicaSelect(selPid=""){
+  const sel=document.getElementById("u-porodica");
+  sel.innerHTML=`<option value="">— Izaberi porodicu —</option>`;
+  porodice.forEach(p=>{
+    const o=document.createElement("option");
+    o.value=p.id; o.textContent=p.naziv;
+    if(p.id===selPid) o.selected=true;
+    sel.appendChild(o);
+  });
+}
+
+function onUplataPorodicaChange(){
+  const pid=document.getElementById("u-porodica").value;
+  uplataPorodicaId=pid;
+  odabraniMeseci=[];
+  if(!pid){
+    document.getElementById("u-preporuka").style.display="none";
+    document.getElementById("u-meseci-box").style.display="none";
+    return;
+  }
+  const uk=getUkupnoP(pid);
+  document.getElementById("u-preporuka-val").textContent=fmt(uk);
+  document.getElementById("u-preporuka").style.display="block";
+  // Postavi default iznos
+  document.getElementById("u-iznos").value=uk||"";
+  renderMeseciLista(pid);
+  document.getElementById("u-meseci-box").style.display="block";
+  updateVisak();
+}
+
+function renderMeseciLista(pid){
   const nep=getNeplaceniMeseci(pid);
   const danas=new Date();
   const tekuci=ym(danas.getFullYear(),danas.getMonth());
-  // Skup meseci za prikaz: neplaceni + tekuci (ako nije vec tu)
+  // Sve neplacene + tekuci ako vec nije tu
   const opcije=[...nep];
-  if(!opcije.includes(tekuci)) opcije.push(tekuci);
+  if(!opcije.includes(tekuci) && getDecaP(pid).some(d=>d.datum_treninga && getMesecOd(d.datum_treninga).includes(tekuci))) opcije.push(tekuci);
   opcije.sort();
-  opcije.forEach(m=>{
-    const o=document.createElement("option");
-    o.value=m; o.textContent=formatMesec(m)+(nep.includes(m)?" ⚠️":"");
-    sel.appendChild(o);
+
+  const lista=document.getElementById("u-meseci-lista");
+  lista.innerHTML="";
+
+  if(!opcije.length){
+    lista.innerHTML=`<div style="color:#0d9488;font-size:13px;padding:8px 0">✓ Sve članarine su plaćene</div>`;
+    return;
+  }
+
+  opcije.forEach(mes=>{
+    const jeNeplac=nep.includes(mes);
+    const iznosMes=getUkupnoP(pid);
+    const [y,mo]=mes.split("-");
+    const label=formatMesec(mes);
+    const checked=odabraniMeseci.includes(mes);
+
+    const div=document.createElement("div");
+    div.style.cssText=`display:flex;align-items:center;justify-content:space-between;background:${checked?"#e85d2618":"#0f1320"};border:1px solid ${checked?"#e85d2666":"#2d3650"};border-radius:10px;padding:11px 14px;cursor:pointer;transition:all 0.15s`;
+    div.onclick=()=>toggleMesec(mes,pid);
+    div.innerHTML=`
+      <div style="display:flex;align-items:center;gap:10px">
+        <div style="width:18px;height:18px;border-radius:5px;border:2px solid ${checked?"#e85d26":"#475569"};background:${checked?"#e85d26":"transparent"};display:flex;align-items:center;justify-content:center;flex-shrink:0">
+          ${checked?`<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>`:""}
+        </div>
+        <div>
+          <div style="color:#e2e8f0;font-size:14px;font-weight:600">${label}</div>
+          <div style="font-size:11px;color:${jeNeplac?"#dc2626":"#64748b"}">${jeNeplac?"⚠️ Neplaćeno":"Tekući mesec"}</div>
+        </div>
+      </div>
+      <div style="color:#e85d26;font-weight:700;font-size:14px">${fmt(iznosMes)}</div>`;
+    lista.appendChild(div);
   });
-  // Default: tekuci mesec ako postoji, inace prvi neplaceni
-  if(opcije.includes(tekuci)) sel.value=tekuci;
-  else if(opcije.length) sel.value=opcije[0];
+}
+
+function toggleMesec(mes, pid){
+  if(odabraniMeseci.includes(mes)){
+    odabraniMeseci=odabraniMeseci.filter(m=>m!==mes);
+  } else {
+    odabraniMeseci.push(mes);
+  }
+  renderMeseciLista(pid);
+  updateVisak();
+}
+
+function onUplataIznosChange(){ updateVisak(); }
+
+function updateVisak(){
+  const pid=document.getElementById("u-porodica").value;
+  if(!pid||!odabraniMeseci.length){
+    document.getElementById("u-visak-box").style.display="none";
+    return;
+  }
+  const iznos=parseInt(document.getElementById("u-iznos").value)||0;
+  const ukPorodica=getUkupnoP(pid);
+  const dugZaOdabrane=ukPorodica*odabraniMeseci.length;
+  const visak=iznos-dugZaOdabrane;
+  if(visak>0){
+    document.getElementById("u-visak-box").style.display="block";
+    document.getElementById("u-visak-val").textContent=`Višak: ${fmt(visak)} (${fmt(dugZaOdabrane)} je dugovanje za ${odabraniMeseci.length} mes.)`;
+  } else {
+    document.getElementById("u-visak-box").style.display="none";
+  }
+}
+
+function openNovaUplata(){
+  uplataPorodicaId="";
+  odabraniMeseci=[];
+  buildUplataPorodicaSelect();
+  document.getElementById("u-iznos").value="";
+  document.getElementById("u-datum").value=todayStr();
+  document.getElementById("u-napomena").value="";
+  document.getElementById("u-preporuka").style.display="none";
+  document.getElementById("u-meseci-box").style.display="none";
+  document.getElementById("u-visak-box").style.display="none";
+  openModal("modal-uplata");
 }
 
 function openUplata(pid){
   uplataPorodicaId=pid;
-  const uk=getUkupnoP(pid);
-  document.getElementById("modal-uplata-title").textContent="Uplata — "+getNazivP(pid);
-  document.getElementById("uplata-rec").textContent=fmt(uk);
-  document.getElementById("u-iznos").value=uk;
+  odabraniMeseci=[];
+  buildUplataPorodicaSelect(pid);
+  document.getElementById("u-iznos").value=getUkupnoP(pid)||"";
   document.getElementById("u-datum").value=todayStr();
   document.getElementById("u-napomena").value="";
-  buildMesecSelect(pid);
+  document.getElementById("u-preporuka-val").textContent=fmt(getUkupnoP(pid));
+  document.getElementById("u-preporuka").style.display="block";
+  renderMeseciLista(pid);
+  document.getElementById("u-meseci-box").style.display="block";
+  document.getElementById("u-visak-box").style.display="none";
   openModal("modal-uplata");
 }
 
 async function sacuvajUplatu(){
   if(saving) return;
+  const pid=document.getElementById("u-porodica").value||uplataPorodicaId;
   const iznos=parseInt(document.getElementById("u-iznos").value);
   const datum=document.getElementById("u-datum").value;
   const nap=document.getElementById("u-napomena").value.trim();
-  const zaMesec=document.getElementById("u-mesec").value;
-  if(!iznos||!datum||!zaMesec){toast("Unesite iznos, datum i mesec!","err");return;}
+  if(!pid){toast("Izaberite porodicu!","err");return;}
+  if(!iznos||!datum){toast("Unesite iznos i datum!","err");return;}
+  if(!odabraniMeseci.length){toast("Odaberite bar jedan mesec!","err");return;}
+
   saving=true; setSync("loading");
   try {
-    const nov=await supa("uplate",{method:"POST",body:{porodica_id:uplataPorodicaId,datum,iznos,napomena:nap||null,za_mesec:zaMesec}});
-    uplate.unshift(nov[0]);
-    toast("Uplata zabeležena ✓");
+    // Kreiraj jednu uplatu po odabranom mesecu
+    const ukPorodica=getUkupnoP(pid);
+    const iznosPoMesecu=Math.round(iznos/odabraniMeseci.length);
+    const sortirani=[...odabraniMeseci].sort();
+    for(let i=0;i<sortirani.length;i++){
+      const mesIznos = i===sortirani.length-1 ? iznos - iznosPoMesecu*(sortirani.length-1) : iznosPoMesecu;
+      const nov=await supa("uplate",{method:"POST",body:{porodica_id:pid,datum,iznos:mesIznos,napomena:nap||null,za_mesec:sortirani[i]}});
+      uplate.unshift(nov[0]);
+    }
+    toast(`Uplata zabeležena ✓ (${sortirani.length} ${sortirani.length===1?"mesec":"meseca"})`);
     closeModal("modal-uplata"); setSync("ok"); render();
   } catch(e){ toast("Greška: "+(e.message||"").slice(0,80),"err"); setSync("err"); }
   saving=false;
@@ -787,7 +935,7 @@ async function obrisiUplatu(id){
 // ═══════════════════════════════════════════
 // IZVEŠTAJ
 // ═══════════════════════════════════════════
-let izvKat="Sve", izvStatus="Svi", izvMesec="";
+let izvKat="Sve", izvStatus="Svi", izvMesec="", izvPorodicaOn=false, izvPorodicaId="";
 
 function initIzvMesec(){
   // Podesi default mesec na tekuci
@@ -808,6 +956,7 @@ function renderIzvestaj(){
   // Filtriraj decu
   const filtered = clanovi.filter(c => {
     if(izvKat!=="Sve" && c.kategorija!==izvKat) return false;
+    if(izvPorodicaOn && izvPorodicaId && c.porodica_id!==izvPorodicaId) return false;
     if(izvStatus!=="Svi"){
       const nep = getNeplaceniMeseciDeteta(c);
       const placeni = getPlaceniMeseci(c.porodica_id);
@@ -852,12 +1001,28 @@ function renderIzvestaj(){
       </select>
     </div>
 
-    <div class="field-wrap" style="margin-bottom:0">
+    <div class="field-wrap">
       <label class="field-label">Status naplate</label>
       <select class="input-field" onchange="izvStatus=this.value;renderIzvestaj()">
         ${["Svi","Plaćeno","Neplaćeno"].map(s=>`<option value="${s}" ${s===izvStatus?"selected":""}>${s}</option>`).join("")}
       </select>
     </div>
+
+    <div class="field-wrap">
+      <label class="field-label">Biraj po porodici</label>
+      <select class="input-field" onchange="izvPorodicaOn=this.value==='Da';if(!izvPorodicaOn)izvPorodicaId='';renderIzvestaj()">
+        <option value="Ne" ${!izvPorodicaOn?"selected":""}>Ne</option>
+        <option value="Da" ${izvPorodicaOn?"selected":""}>Da</option>
+      </select>
+    </div>
+
+    ${izvPorodicaOn ? `<div class="field-wrap" style="margin-bottom:0">
+      <label class="field-label">Odaberi porodicu</label>
+      <select class="input-field" onchange="izvPorodicaId=this.value;renderIzvestaj()">
+        <option value="">— Sve porodice —</option>
+        ${porodice.map(p=>`<option value="${p.id}" ${p.id===izvPorodicaId?"selected":""}>${p.naziv}</option>`).join("")}
+      </select>
+    </div>` : ""}
   </div>
 
   <div class="grid2" style="margin-bottom:14px">
