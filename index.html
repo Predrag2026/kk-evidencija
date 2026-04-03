@@ -10,35 +10,42 @@
 <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700;800&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet"/>
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
-body{background:#0f1320;font-family:'DM Sans',sans-serif;color:#e2e8f0;max-width:480px;margin:0 auto;min-height:100vh}
+body{background:#0b0f1a;font-family:'DM Sans',sans-serif;color:#e2e8f0;max-width:480px;margin:0 auto;min-height:100vh}
 input,select,button,textarea{font-family:'DM Sans',sans-serif}
 ::-webkit-scrollbar{width:4px}
-::-webkit-scrollbar-thumb{background:#2d3650;border-radius:2px}
+::-webkit-scrollbar-thumb{background:#e85d2644;border-radius:2px}
 input[type=date]::-webkit-calendar-picker-indicator{filter:invert(0.5)}
 select option{background:#1a1f2e;color:#e2e8f0}
-.page{display:none;padding:16px 16px 86px}
+.page{display:none;padding:16px 16px 90px;animation:fadeIn 0.2s ease}
 .page.active{display:block}
-.header{padding:16px;display:flex;align-items:center;gap:10px;border-bottom:1px solid #2d3650;position:sticky;top:0;background:#0f1320;z-index:10}
-.logo-box{background:#e85d26;border-radius:11px;padding:8px;display:flex;flex-shrink:0}
-.app-title{color:#f1f5f9;font-family:'Outfit',sans-serif;font-weight:800;font-size:16px;letter-spacing:-0.02em}
+@keyframes fadeIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
+.header{padding:14px 16px;display:flex;align-items:center;gap:10px;border-bottom:1px solid #e85d2622;position:sticky;top:0;z-index:10}
+.logo-box{border-radius:12px;padding:9px;display:flex;flex-shrink:0;cursor:pointer;transition:transform 0.15s}
+.logo-box:active{transform:scale(0.92)}
+.app-title{color:#f1f5f9;font-family:'Outfit',sans-serif;font-weight:800;font-size:14px;letter-spacing:-0.02em}
 .app-sub{color:#64748b;font-size:11px}
+@keyframes ballBounce{0%{transform:translateY(0) rotate(0deg)}25%{transform:translateY(-120px) rotate(180deg)}50%{transform:translateY(-30px) rotate(270deg)}75%{transform:translateY(-90px) rotate(340deg)}100%{transform:translateY(0) rotate(360deg)}}
+@keyframes ballSlide{0%{left:-60px;top:40px;opacity:1}40%{left:50%;top:-20px}60%{left:50%;top:-20px}100%{left:110%;top:40px;opacity:0}}
 .sync-dot{width:8px;height:8px;border-radius:50%;background:#0d9488;margin-left:auto;flex-shrink:0}
 .sync-dot.err{background:#dc2626}
 .sync-dot.loading{background:#f59e0b;animation:pulse 1s infinite}
 @keyframes pulse{0%,100%{opacity:1}50%{opacity:0.3}}
-.bottom-nav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:480px;background:#151929;border-top:1px solid #2d3650;display:flex;padding:7px 0 13px;z-index:100}
-.nav-btn{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;background:none;border:none;cursor:pointer;padding:5px 0;color:#475569;font-size:10px;font-weight:600}
+.bottom-nav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:480px;background:rgba(11,15,26,0.96);border-top:1px solid #e85d2622;display:flex;padding:7px 0 14px;z-index:100;backdrop-filter:blur(12px)}
+.nav-btn{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;background:none;border:none;cursor:pointer;padding:5px 0;color:#475569;font-size:10px;font-weight:600;transition:color 0.15s;position:relative}
 .nav-btn.active{color:#e85d26}
+.nav-btn.active::after{content:'';position:absolute;bottom:-7px;width:24px;height:3px;background:linear-gradient(90deg,#e85d26,#f97316);border-radius:2px 2px 0 0}
 .grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px}
-.card{background:#1a1f2e;border:1px solid #2d3650;border-radius:14px;padding:16px;position:relative;overflow:hidden}
-.card-accent{position:absolute;top:0;right:0;width:65px;height:65px;opacity:0.07;border-radius:0 14px 0 65px}
+.card{background:linear-gradient(135deg,#1a1f2e,#151929);border:1px solid #2d3650;border-radius:16px;padding:16px;position:relative;overflow:hidden;transition:transform 0.15s,border-color 0.15s}
+.card:active{transform:scale(0.98)}
+.card-accent{position:absolute;top:0;right:0;width:80px;height:80px;opacity:0.1;border-radius:0 16px 0 80px}
 .card-icon{border-radius:8px;padding:6px;display:inline-flex;margin-bottom:10px}
 .card-label{color:#64748b;font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:0.05em;display:block;margin-bottom:6px}
 .card-val{color:#f1f5f9;font-size:22px;font-family:'Outfit',sans-serif;font-weight:700;line-height:1}
 .card-sub{color:#64748b;font-size:11px;margin-top:4px}
-.section{background:#1a1f2e;border:1px solid #2d3650;border-radius:14px;padding:16px;margin-bottom:14px}
+.section{background:linear-gradient(135deg,#1a1f2e,#151929);border:1px solid #2a3048;border-radius:16px;padding:16px;margin-bottom:14px}
 .section-title{color:#94a3b8;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;margin-bottom:13px}
-.member-card{background:#1a1f2e;border:1px solid #2d3650;border-radius:13px;padding:13px;margin-bottom:8px}
+.member-card{background:linear-gradient(135deg,#1a1f2e,#151929);border:1px solid #2a3048;border-radius:14px;padding:13px;margin-bottom:8px;transition:border-color 0.2s,transform 0.15s}
+.member-card:active{transform:scale(0.99)}
 .badge{padding:2px 7px;border-radius:10px;font-size:11px;font-weight:700;display:inline-block}
 .badge-green{background:#0d948822;color:#0d9488}
 .badge-yellow{background:#d9770622;color:#d97706}
@@ -50,9 +57,10 @@ select option{background:#1a1f2e;color:#e2e8f0}
 .icon-btn-green{background:#0d948822}
 .icon-btn-blue{background:#3b82f622}
 .icon-btn-red{background:#dc262622}
-.main-btn{width:100%;border:none;border-radius:10px;padding:12px;color:#fff;font-weight:700;font-size:15px;cursor:pointer;font-family:'Outfit',sans-serif;margin-top:4px}
-.btn-orange{background:#e85d26}
-.btn-teal{background:#0d9488}
+.main-btn{width:100%;border:none;border-radius:12px;padding:13px;color:#fff;font-weight:700;font-size:15px;cursor:pointer;font-family:'Outfit',sans-serif;margin-top:6px;transition:transform 0.15s,opacity 0.15s}
+.main-btn:active{transform:scale(0.98);opacity:0.9}
+.btn-orange{background:linear-gradient(135deg,#e85d26,#c2410c);box-shadow:0 4px 14px #e85d2640}
+.btn-teal{background:linear-gradient(135deg,#0d9488,#0f766e);box-shadow:0 4px 14px #0d948840}
 .input-field{width:100%;background:#0f1320;border:1px solid #2d3650;border-radius:10px;padding:11px 14px;color:#e2e8f0;font-size:14px;outline:none;box-sizing:border-box}
 .input-field:focus{border-color:#e85d26}
 .field-label{display:block;color:#94a3b8;font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.06em;margin-bottom:5px}
@@ -71,7 +79,8 @@ select option{background:#1a1f2e;color:#e2e8f0}
 .filter-btn.active{background:#e85d26;color:#fff}
 .page-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px}
 .page-title{color:#f1f5f9;font-size:22px;font-family:'Outfit',sans-serif;font-weight:700;margin:0}
-.add-btn{display:flex;align-items:center;gap:5px;background:#e85d26;border:none;border-radius:10px;padding:9px 14px;color:#fff;font-weight:700;font-size:13px;cursor:pointer}
+.add-btn{display:flex;align-items:center;gap:5px;background:linear-gradient(135deg,#e85d26,#c2410c);border:none;border-radius:10px;padding:9px 14px;color:#fff;font-weight:700;font-size:13px;cursor:pointer;box-shadow:0 4px 12px #e85d2640;transition:transform 0.15s,box-shadow 0.15s}
+.add-btn:active{transform:scale(0.96);box-shadow:0 2px 6px #e85d2440}
 .bar-wrap{background:#0f1320;border-radius:4px;height:5px;margin-top:5px}
 .bar{background:linear-gradient(90deg,#e85d26,#f97316);height:100%;border-radius:4px}
 .row-sep{padding:10px 0;border-bottom:1px solid #2d3650;display:flex;justify-content:space-between;align-items:center}
@@ -105,12 +114,27 @@ select option{background:#1a1f2e;color:#e2e8f0}
 </head>
 <body>
 
-<div class="header">
-  <div class="logo-box">
-    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M4.93 4.93c4.08 4.08 4.08 10.66 0 14.74"/><path d="M19.07 4.93c-4.08 4.08-4.08 10.66 0 14.74"/><line x1="2" y1="12" x2="22" y2="12"/></svg>
+<!-- Animirana lopta u pozadini -->
+<div id="ball-anim" style="position:fixed;pointer-events:none;z-index:5;display:none">
+  <svg id="ball-svg" width="40" height="40" viewBox="0 0 40 40">
+    <circle cx="20" cy="20" r="18" fill="#e85d26" opacity="0.9"/>
+    <path d="M4 20 Q20 8 36 20" stroke="#c2410c" stroke-width="2" fill="none"/>
+    <path d="M4 20 Q20 32 36 20" stroke="#c2410c" stroke-width="2" fill="none"/>
+    <line x1="20" y1="2" x2="20" y2="38" stroke="#c2410c" stroke-width="2"/>
+  </svg>
+</div>
+
+<div class="header" style="background:linear-gradient(135deg,#0f1320 0%,#1a1f2e 100%);border-bottom:1px solid #e85d2633">
+  <div class="logo-box" style="background:linear-gradient(135deg,#e85d26,#c2410c);box-shadow:0 4px 14px #e85d2644" onclick="animateBall()">
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <circle cx="12" cy="12" r="10"/>
+      <path d="M4.93 4.93c4.08 4.08 4.08 10.66 0 14.74"/>
+      <path d="M19.07 4.93c-4.08 4.08-4.08 10.66 0 14.74"/>
+      <line x1="2" y1="12" x2="22" y2="12"/>
+    </svg>
   </div>
-  <div>
-    <div class="app-title">KK BB Basket Mladenovac</div>
+  <div style="flex:1;min-width:0">
+    <div class="app-title" style="font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">KK BB Basket Mladenovac</div>
     <div class="app-sub">Mlađe kategorije</div>
   </div>
   <div id="sync-dot" class="sync-dot loading"></div>
@@ -375,6 +399,13 @@ function setSync(s){
 // ═══════════════════════════════════════════
 // LOAD
 // ═══════════════════════════════════════════
+function animateBall(){
+  const ball=document.getElementById("ball-anim");
+  ball.style.display="block";
+  ball.style.cssText="position:fixed;pointer-events:none;z-index:9999;left:-60px;top:40px;animation:ballSlide 1.2s ease-in-out forwards";
+  setTimeout(()=>ball.style.display="none",1300);
+}
+
 async function loadAll(){
   setSync("loading");
   try {
@@ -500,62 +531,80 @@ function renderDashboard(){
 // ═══════════════════════════════════════════
 // ČLANOVI
 // ═══════════════════════════════════════════
-function renderClanovi(){
+function renderClanovi(fullRender=true){
+  const page = document.getElementById("page-clanovi");
+
+  if(fullRender || !page.querySelector("#clanovi-lista")){
+    // Puni render - samo jednom ili kada se menja filter
+    page.innerHTML=`
+    <div class="page-header">
+      <h2 class="page-title">Članovi</h2>
+      <button class="add-btn" onclick="openDodaj()">${svg("plus","#fff",14)} Dodaj</button>
+    </div>
+    <div class="search-wrap">
+      <span class="search-icon">${svg("search","#64748b",14)}</span>
+      <input class="input-field search-input" id="clanovi-search" type="text" placeholder="Ime ili porodica..."
+        oninput="searchStr=this.value;renderClanListOnly()"/>
+    </div>
+    <div class="filter-row">
+      ${["Sve",...KATEGORIJE].map(k=>`<button class="filter-btn${filterKat===k?" active":""}" onclick="filterKat='${k}';renderClanovi()">${k}</button>`).join("")}
+    </div>
+    <div id="clanovi-lista"></div>`;
+
+    // Vrati fokus i vrednost search polja
+    const inp = page.querySelector("#clanovi-search");
+    if(inp){ inp.value=searchStr; }
+  }
+  renderClanListOnly();
+}
+
+function renderClanListOnly(){
   const filtered=clanovi.filter(c=>{
     const ms=c.ime.toLowerCase().includes(searchStr.toLowerCase())||getNazivP(c.porodica_id).toLowerCase().includes(searchStr.toLowerCase());
     return ms&&(filterKat==="Sve"||c.kategorija===filterKat);
   });
-
-  let html=`
-  <div class="page-header">
-    <h2 class="page-title">Članovi</h2>
-    <button class="add-btn" onclick="openDodaj()">${svg("plus","#fff",14)} Dodaj</button>
-  </div>
-  <div class="search-wrap">
-    <span class="search-icon">${svg("search","#64748b",14)}</span>
-    <input class="input-field search-input" type="text" placeholder="Ime ili porodica..." value="${searchStr.replace(/"/g,"&quot;")}" oninput="searchStr=this.value;renderClanovi()"/>
-  </div>
-  <div class="filter-row">
-    ${["Sve",...KATEGORIJE].map(k=>`<button class="filter-btn${filterKat===k?" active":""}" onclick="filterKat='${k}';renderClanovi()">${k}</button>`).join("")}
-  </div>`;
+  const lista=document.getElementById("clanovi-lista");
+  if(!lista) return;
 
   if(!filtered.length){
-    html+=`<div class="empty">${clanovi.length?"Nema rezultata pretrage":"Nema članova. Dodaj prvog klikom na + Dodaj."}</div>`;
-  } else {
-    filtered.forEach(c=>{
-      const st=getStatusDeteta(c);
-      const nep=getNeplaceniMeseciDeteta(c);
-      const rB=c.r_br===1?"badge-blue":c.r_br===2?"badge-amber":"badge-green";
-      const rT=c.r_br===1?"1. dete":c.r_br===2?"2. dete":"3.+ dete";
-      const izS=c.iznos===0?`<span style="color:#0d9488;font-weight:700">Besplatno</span>`:fmt(c.iznos);
-      const trenDatum=c.datum_treninga?`<br><span style="color:#475569">Trening od: ${c.datum_treninga}</span>`:"";
-      const nepHtml=nep.length?`<div style="margin-top:4px">${nep.slice(-2).map(mes=>{
-        const [y,mo]=mes.split("-");
-        return `<span class="dug-chip">${MESECI_KR[parseInt(mo)-1]} ${y}</span>`;
-      }).join("")}${nep.length>2?`<span style="color:#dc2626;font-size:11px"> +${nep.length-2}</span>`:""}</div>`:"";
-
-      html+=`<div class="member-card">
-        <div style="display:flex;justify-content:space-between;align-items:flex-start">
-          <div style="flex:1;min-width:0">
-            <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-bottom:3px">
-              <span style="color:#f1f5f9;font-weight:700;font-size:15px">${c.ime}</span>
-              <span class="badge ${st.cls}">${st.label}</span>
-              <span class="badge ${rB}">${rT}</span>
-            </div>
-            <div style="color:#64748b;font-size:12px">${c.kategorija} · ${izS}${trenDatum}</div>
-            <div style="color:#475569;font-size:11px;margin-top:2px">👨‍👩‍👦 ${getNazivP(c.porodica_id)}${c.tel?" · "+c.tel:""}</div>
-            ${nepHtml}
-          </div>
-          <div class="btn-row">
-            <button class="icon-btn icon-btn-green" title="Uplata" onclick="openUplata('${c.porodica_id}')">${svg("payment","#0d9488",14)}</button>
-            <button class="icon-btn icon-btn-blue" title="Uredi" onclick="openEdit(${c.id})">${svg("edit","#3b82f6",14)}</button>
-            <button class="icon-btn icon-btn-red" title="Obriši" onclick="obrisiClana(${c.id})">${svg("trash","#dc2626",14)}</button>
-          </div>
-        </div>
-      </div>`;
-    });
+    lista.innerHTML=`<div class="empty">${clanovi.length?"Nema rezultata pretrage":"Nema članova. Dodaj prvog klikom na + Dodaj."}</div>`;
+    return;
   }
-  document.getElementById("page-clanovi").innerHTML=html;
+
+  let html="";
+  filtered.forEach(c=>{
+    const st=getStatusDeteta(c);
+    const nep=getNeplaceniMeseciDeteta(c);
+    const rB=c.r_br===1?"badge-blue":c.r_br===2?"badge-amber":"badge-green";
+    const rT=c.r_br===1?"1. dete":c.r_br===2?"2. dete":"3.+ dete";
+    const izS=c.iznos===0?`<span style="color:#0d9488;font-weight:700">Besplatno</span>`:fmt(c.iznos);
+    const trenDatum=c.datum_treninga?`<br><span style="color:#475569">Trening od: ${c.datum_treninga}</span>`:"";
+    const nepHtml=nep.length?`<div style="margin-top:4px">${nep.slice(-2).map(mes=>{
+      const [y,mo]=mes.split("-");
+      return `<span class="dug-chip">${MESECI_KR[parseInt(mo)-1]} ${y}</span>`;
+    }).join("")}${nep.length>2?`<span style="color:#dc2626;font-size:11px"> +${nep.length-2}</span>`:""}</div>`:"";
+
+    html+=`<div class="member-card">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start">
+        <div style="flex:1;min-width:0">
+          <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-bottom:3px">
+            <span style="color:#f1f5f9;font-weight:700;font-size:15px">${c.ime}</span>
+            <span class="badge ${st.cls}">${st.label}</span>
+            <span class="badge ${rB}">${rT}</span>
+          </div>
+          <div style="color:#64748b;font-size:12px">${c.kategorija} · ${izS}${trenDatum}</div>
+          <div style="color:#475569;font-size:11px;margin-top:2px">👨‍👩‍👦 ${getNazivP(c.porodica_id)}${c.tel?" · "+c.tel:""}</div>
+          ${nepHtml}
+        </div>
+        <div class="btn-row">
+          <button class="icon-btn icon-btn-green" title="Uplata" onclick="openUplata('${c.porodica_id}')">${svg("payment","#0d9488",14)}</button>
+          <button class="icon-btn icon-btn-blue" title="Uredi" onclick="openEdit(${c.id})">${svg("edit","#3b82f6",14)}</button>
+          <button class="icon-btn icon-btn-red" title="Obriši" onclick="obrisiClana(${c.id})">${svg("trash","#dc2626",14)}</button>
+        </div>
+      </div>
+    </div>`;
+  });
+  lista.innerHTML=html;
 }
 
 // ═══════════════════════════════════════════
@@ -842,6 +891,7 @@ function selectPorodica(prefix, id, naziv){
   document.getElementById(prefix+"-porodica-dropdown").classList.remove("open");
   if(prefix==="u") onUplataPorodicaChange();
   if(prefix==="f") onPorodicaChange();
+  if(prefix==="izv"){ izvPorodicaId=id; renderIzvestajLista(); }
 }
 
 function clearPorodicaSearch(prefix){
@@ -850,6 +900,7 @@ function clearPorodicaSearch(prefix){
   document.getElementById(prefix+"-porodica-clear").style.display="none";
   if(prefix==="u") onUplataPorodicaChange();
   if(prefix==="f") onPorodicaChange();
+  if(prefix==="izv"){ izvPorodicaId=""; renderIzvestajLista(); }
 }
 
 function buildUplataPorodicaSelect(selPid=""){
@@ -1061,15 +1112,95 @@ function initIzvMesec(){
   }
 }
 
+function renderIzvestajLista(){
+  const page=document.getElementById("page-izvestaj");
+  const listaEl=page.querySelector("#izvestaj-lista");
+  if(!listaEl) return;
+  initIzvMesec();
+
+  const filtered = clanovi.filter(c => {
+    if(izvKat!=="Sve" && c.kategorija!==izvKat) return false;
+    if(izvPorodicaOn && izvPorodicaId && c.porodica_id!==izvPorodicaId) return false;
+    if(izvStatus!=="Svi"){
+      const placeni = getPlaceniMeseci(c.porodica_id);
+      const aktivan = c.datum_treninga && getMesecOd(c.datum_treninga).includes(izvMesec);
+      if(!aktivan) return false;
+      const placenTajMesec = placeni.includes(izvMesec);
+      if(izvStatus==="Plaćeno" && !placenTajMesec) return false;
+      if(izvStatus==="Neplaćeno" && placenTajMesec) return false;
+    } else {
+      if(!c.datum_treninga) return false;
+      if(!getMesecOd(c.datum_treninga).includes(izvMesec)) return false;
+    }
+    return true;
+  });
+
+  const ukupnoIznos = filtered.reduce((s,c)=>s+c.iznos,0);
+  const placeni_count = filtered.filter(c=>getPlaceniMeseci(c.porodica_id).includes(izvMesec)).length;
+
+  // Update summary cards
+  const summaryEl=page.querySelector("#izvestaj-summary");
+  if(summaryEl){
+    summaryEl.innerHTML=`
+      ${statCard("users","Pronađeno",filtered.length,"dece","#3b82f6")}
+      ${statCard("payment","Platilo",placeni_count+" / "+filtered.length,"za izabrani mesec","#0d9488")}`;
+  }
+
+  if(!filtered.length){
+    listaEl.innerHTML=`<div class="empty">Nema dece za izabrane filtere</div>`;
+    return;
+  }
+
+  let html="";
+  filtered.forEach(c=>{
+    const placeni=getPlaceniMeseci(c.porodica_id);
+    const placenTajMesec=placeni.includes(izvMesec);
+    const iznos=c.iznos===0?`<span style="color:#0d9488;font-weight:700">Besplatno</span>`:fmt(c.iznos);
+    const statusChip=placenTajMesec?`<span class="ok-chip">✓ Plaćeno</span>`:`<span class="dug-chip">✗ Neplaćeno</span>`;
+    const rB=c.r_br===1?"badge-blue":c.r_br===2?"badge-amber":"badge-green";
+    const rT=c.r_br===1?"1. dete":c.r_br===2?"2. dete":"3.+ dete";
+    html+=`<div class="member-card">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start">
+        <div style="flex:1;min-width:0">
+          <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-bottom:3px">
+            <span style="color:#f1f5f9;font-weight:700;font-size:15px">${c.ime}</span>
+            <span class="badge ${rB}">${rT}</span>
+          </div>
+          <div style="color:#64748b;font-size:12px">${c.kategorija} · ${iznos}</div>
+          <div style="color:#475569;font-size:11px;margin-top:2px">👨‍👩‍👦 ${getNazivP(c.porodica_id)}${c.tel?" · "+c.tel:""}</div>
+          <div style="margin-top:5px">${statusChip}</div>
+        </div>
+        <button class="icon-btn icon-btn-green" onclick="openUplata('${c.porodica_id}')" style="margin-left:8px">${svg("payment","#0d9488",14)}</button>
+      </div>
+    </div>`;
+  });
+
+  if(izvStatus==="Neplaćeno"){
+    const ukNep=filtered.reduce((s,c)=>s+c.iznos,0);
+    html+=`<div style="background:#dc262610;border:1px solid #dc262633;border-radius:12px;padding:14px;margin-top:8px;display:flex;justify-content:space-between;align-items:center">
+      <span style="color:#94a3b8;font-size:13px">Ukupno neplaćeno</span>
+      <span style="color:#dc2626;font-weight:700;font-size:15px">${fmt(ukNep)}</span>
+    </div>`;
+  }
+  if(izvStatus==="Plaćeno"){
+    html+=`<div style="background:#0d948810;border:1px solid #0d948833;border-radius:12px;padding:14px;margin-top:8px;display:flex;justify-content:space-between;align-items:center">
+      <span style="color:#94a3b8;font-size:13px">Ukupno naplaćeno</span>
+      <span style="color:#0d9488;font-weight:700;font-size:15px">${fmt(ukupnoIznos)}</span>
+    </div>`;
+  }
+  listaEl.innerHTML=html;
+}
+
 function renderIzvestaj(){
   initIzvMesec();
 
-  // Generiši listu meseci (od najranijeg treninga do danas)
+  const page=document.getElementById("page-izvestaj");
+  // Generiši listu meseci
   const sviDatumi = clanovi.map(c=>c.datum_treninga).filter(Boolean).sort();
   const najraniji = sviDatumi[0];
   const svMeseci = najraniji ? getMesecOd(najraniji) : [];
 
-  // Filtriraj decu
+  // Filtriraj decu (za summary)
   const filtered = clanovi.filter(c => {
     if(izvKat!=="Sve" && c.kategorija!==izvKat) return false;
     if(izvPorodicaOn && izvPorodicaId && c.porodica_id!==izvPorodicaId) return false;
@@ -1089,109 +1220,54 @@ function renderIzvestaj(){
     return true;
   });
 
-  const ukupnoIznos = filtered.reduce((s,c)=>s+c.iznos,0);
-  const placeni_count = filtered.filter(c=>{
-    const placeni=getPlaceniMeseci(c.porodica_id);
-    return placeni.includes(izvMesec);
-  }).length;
-
-  let html=`
-  <div style="margin-bottom:18px">
-    <h2 class="page-title">Izveštaj</h2>
-  </div>
+  const html=`
+  <div style="margin-bottom:18px"><h2 class="page-title">Izveštaj</h2></div>
 
   <div class="section" style="margin-bottom:14px">
     <div class="section-title">Filteri</div>
-
     <div class="field-wrap">
       <label class="field-label">Mesec</label>
-      <select class="input-field" onchange="izvMesec=this.value;renderIzvestaj()">
+      <select class="input-field" onchange="izvMesec=this.value;renderIzvestajLista()">
         ${svMeseci.slice().reverse().map(m=>`<option value="${m}" ${m===izvMesec?"selected":""}>${formatMesec(m)}</option>`).join("")}
       </select>
     </div>
-
     <div class="field-wrap">
       <label class="field-label">Kategorija</label>
-      <select class="input-field" onchange="izvKat=this.value;renderIzvestaj()">
+      <select class="input-field" onchange="izvKat=this.value;renderIzvestajLista()">
         ${["Sve",...KATEGORIJE].map(k=>`<option value="${k}" ${k===izvKat?"selected":""}>${k}</option>`).join("")}
       </select>
     </div>
-
     <div class="field-wrap">
       <label class="field-label">Status naplate</label>
-      <select class="input-field" onchange="izvStatus=this.value;renderIzvestaj()">
+      <select class="input-field" onchange="izvStatus=this.value;renderIzvestajLista()">
         ${["Svi","Plaćeno","Neplaćeno"].map(s=>`<option value="${s}" ${s===izvStatus?"selected":""}>${s}</option>`).join("")}
       </select>
     </div>
-
     <div class="field-wrap">
       <label class="field-label">Biraj po porodici</label>
-      <select class="input-field" onchange="izvPorodicaOn=this.value==='Da';if(!izvPorodicaOn)izvPorodicaId='';renderIzvestaj()">
+      <select class="input-field" onchange="izvPorodicaOn=this.value==='Da';if(!izvPorodicaOn){izvPorodicaId='';renderIzvestaj();}else{renderIzvestaj();}">
         <option value="Ne" ${!izvPorodicaOn?"selected":""}>Ne</option>
         <option value="Da" ${izvPorodicaOn?"selected":""}>Da</option>
       </select>
     </div>
-
-    ${izvPorodicaOn ? `<div class="field-wrap" style="margin-bottom:0">
+    ${izvPorodicaOn?`<div class="field-wrap" style="margin-bottom:0;position:relative">
       <label class="field-label">Odaberi porodicu</label>
-      <select class="input-field" onchange="izvPorodicaId=this.value;renderIzvestaj()">
-        <option value="">— Sve porodice —</option>
-        ${porodice.map(p=>`<option value="${p.id}" ${p.id===izvPorodicaId?"selected":""}>${p.naziv}</option>`).join("")}
-      </select>
-    </div>` : ""}
+      <div class="porodica-search-wrap">
+        <input class="input-field" id="izv-porodica-search" type="text" placeholder="Pretraži porodicu..." autocomplete="off"
+          value="${izvPorodicaId?getNazivP(izvPorodicaId):''}"
+          oninput="filterPorodicaDropdown('izv')" onfocus="openPorodicaDropdown('izv')" style="padding-right:36px"/>
+        <div id="izv-porodica-clear" onclick="clearPorodicaSearch('izv')" style="display:${izvPorodicaId?'block':'none'};position:absolute;right:12px;top:50%;transform:translateY(-50%);cursor:pointer;color:#64748b">✕</div>
+      </div>
+      <div class="porodica-dropdown" id="izv-porodica-dropdown"></div>
+      <input type="hidden" id="izv-porodica" value="${izvPorodicaId}"/>
+    </div>`:""}
   </div>
 
-  <div class="grid2" style="margin-bottom:14px">
-    ${statCard("users","Pronađeno",filtered.length,"dece","#3b82f6")}
-    ${statCard("payment","Platilo",placeni_count+" / "+filtered.length,"za izabrani mesec","#0d9488")}
-  </div>`;
+  <div class="grid2" id="izvestaj-summary" style="margin-bottom:14px"></div>
+  <div id="izvestaj-lista"></div>`;
 
-  if(!filtered.length){
-    html+=`<div class="empty">Nema dece za izabrane filtere</div>`;
-  } else {
-    filtered.forEach(c=>{
-      const placeni=getPlaceniMeseci(c.porodica_id);
-      const placenTajMesec=placeni.includes(izvMesec);
-      const iznos=c.iznos===0?`<span style="color:#0d9488;font-weight:700">Besplatno</span>`:fmt(c.iznos);
-      const statusChip=placenTajMesec
-        ?`<span class="ok-chip">✓ Plaćeno</span>`
-        :`<span class="dug-chip">✗ Neplaćeno</span>`;
-      const rB=c.r_br===1?"badge-blue":c.r_br===2?"badge-amber":"badge-green";
-      const rT=c.r_br===1?"1. dete":c.r_br===2?"2. dete":"3.+ dete";
-      html+=`<div class="member-card">
-        <div style="display:flex;justify-content:space-between;align-items:flex-start">
-          <div style="flex:1;min-width:0">
-            <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-bottom:3px">
-              <span style="color:#f1f5f9;font-weight:700;font-size:15px">${c.ime}</span>
-              <span class="badge ${rB}">${rT}</span>
-            </div>
-            <div style="color:#64748b;font-size:12px">${c.kategorija} · ${iznos}</div>
-            <div style="color:#475569;font-size:11px;margin-top:2px">👨‍👩‍👦 ${getNazivP(c.porodica_id)}${c.tel?" · "+c.tel:""}</div>
-            <div style="margin-top:5px">${statusChip}</div>
-          </div>
-          <button class="icon-btn icon-btn-green" title="Uplata" onclick="openUplata('${c.porodica_id}')" style="margin-left:8px">
-            ${svg("payment","#0d9488",14)}
-          </button>
-        </div>
-      </div>`;
-    });
-
-    if(izvStatus==="Neplaćeno"){
-      const ukNeplac = filtered.reduce((s,c)=>s+c.iznos,0);
-      html+=`<div style="background:#dc262610;border:1px solid #dc262633;border-radius:12px;padding:14px;margin-top:8px;display:flex;justify-content:space-between;align-items:center">
-        <span style="color:#94a3b8;font-size:13px">Ukupno neplaćeno</span>
-        <span style="color:#dc2626;font-weight:700;font-size:15px">${fmt(ukNeplac)}</span>
-      </div>`;
-    }
-    if(izvStatus==="Plaćeno"){
-      html+=`<div style="background:#0d948810;border:1px solid #0d948833;border-radius:12px;padding:14px;margin-top:8px;display:flex;justify-content:space-between;align-items:center">
-        <span style="color:#94a3b8;font-size:13px">Ukupno naplaćeno</span>
-        <span style="color:#0d9488;font-weight:700;font-size:15px">${fmt(ukupnoIznos)}</span>
-      </div>`;
-    }
-  }
-
-  document.getElementById("page-izvestaj").innerHTML=html;
+  page.innerHTML=html;
+  renderIzvestajLista();
 }
 
 function render(){
