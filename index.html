@@ -256,27 +256,34 @@ function getPlaceniMeseci(pid){
   return uplate.filter(u=>u.porodica_id===pid&&u.za_mesec).map(u=>u.za_mesec);
 }
 
-// Status porodice: neplaceni meseci se racunaju po svakom detetu posebno
-// Mesec se smatra dugovanim ako BILO KOJE dete duguje taj mesec
+// Neplaceni meseci za konkretno dete (nezavisno od ostale dece)
+function getNeplaceniMeseciDeteta(dete){
+  if(!dete.datum_treninga) return [];
+  const placeni = getPlaceniMeseci(dete.porodica_id);
+  const meseciDeteta = getMesecOd(dete.datum_treninga);
+  return meseciDeteta.filter(m => !placeni.includes(m));
+}
+
+// Neplaceni meseci za porodicu = unija neplacenih meseci sve dece
 function getNeplaceniMeseci(pid){
   const deca = getDecaP(pid);
   if(!deca.length) return [];
-  const placeni = getPlaceniMeseci(pid);
-
-  // Skup svih meseci koje duguje bar jedno dete
   const dugSet = new Set();
   deca.forEach(dete => {
-    if(!dete.datum_treninga) return;
-    // Meseci od datuma treninga tog deteta do danas
-    const meseciDeteta = getMesecOd(dete.datum_treninga);
-    meseciDeteta.forEach(m => {
-      if(!placeni.includes(m)) dugSet.add(m);
-    });
+    getNeplaceniMeseciDeteta(dete).forEach(m => dugSet.add(m));
   });
-
   return [...dugSet].sort();
 }
 
+// Status pojedinacnog deteta
+function getStatusDeteta(dete){
+  const nep = getNeplaceniMeseciDeteta(dete);
+  if(!nep.length) return {cls:"badge-green", label:"Plaćeno"};
+  if(nep.length===1) return {cls:"badge-yellow", label:"1 mes. dug"};
+  return {cls:"badge-red", label:nep.length+" mes. dug"};
+}
+
+// Status porodice (za dashboard)
 function getStatus(pid){
   const nep = getNeplaceniMeseci(pid);
   if(!nep.length) return {cls:"badge-green", label:"Plaćeno"};
@@ -480,8 +487,8 @@ function renderClanovi(){
     html+=`<div class="empty">${clanovi.length?"Nema rezultata pretrage":"Nema članova. Dodaj prvog klikom na + Dodaj."}</div>`;
   } else {
     filtered.forEach(c=>{
-      const st=getStatus(c.porodica_id);
-      const nep=getNeplaceniMeseci(c.porodica_id);
+      const st=getStatusDeteta(c);
+      const nep=getNeplaceniMeseciDeteta(c);
       const rB=c.r_br===1?"badge-blue":c.r_br===2?"badge-amber":"badge-green";
       const rT=c.r_br===1?"1. dete":c.r_br===2?"2. dete":"3.+ dete";
       const izS=c.iznos===0?`<span style="color:#0d9488;font-weight:700">Besplatno</span>`:fmt(c.iznos);
